@@ -5,9 +5,17 @@ import tempfile
 import logging
 import io
 
-# 強制 stdout/stderr 使用 UTF-8 編碼
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+# 強制 stdout/stderr 使用 UTF-8 編碼 (僅在未被包裝時)
+if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    except AttributeError:
+        pass  # stdout 已經被包裝或不支援 buffer 屬性
+if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != 'utf-8':
+    try:
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+    except AttributeError:
+        pass  # stderr 已經被包裝或不支援 buffer 屬性
 
 # 將當前工作目錄加入 sys.path (假設從專案根目錄執行)
 if os.getcwd() not in sys.path:
@@ -235,11 +243,11 @@ def test_page_files_exist():
     """檢查所有頁面檔案是否存在"""
     pages = [
         ("Home.py", "平台入口"),
-        ("pages/1_🚒_消防檢修申報.py", "消防申報系統"),
-        ("pages/2_🍱_社區互助送餐.py", "送餐系統"),
-        ("pages/3_📢_防災智慧導覽.py", "防災館導覽"),
-        ("pages/3_案件審核.py", "案件審核"),
-        ("pages/4_自動比對系統.py", "自動比對"),
+        ("pages/1_disaster_prevention_museum_booking.py", "防災館預約"),
+        ("pages/2_community_meal_delivery.py", "送餐系統"),
+        ("pages/3_public_application_and_inquiry.py", "公共申請查詢"),
+        ("pages/4_case_review.py", "案件審核"),
+        ("pages/5_auto_comparison_system.py", "自動比對"),
     ]
 
     missing_files = []
@@ -267,12 +275,19 @@ def test_config_files():
 
     # 測試讀取設定
     try:
-        tesseract_path = cfg.get_tesseract_path()
-        excel_path = cfg.get_excel_path()
+        # 檢查 CONFIG 字典是否存在
+        if not hasattr(cfg, 'CONFIG'):
+            # 如果沒有 CONFIG，嘗試載入
+            config = cfg.load_config()
+        else:
+            config = cfg.CONFIG
 
-        # 不要求這些檔案必須存在，只要能讀取設定即可
-        print(f"   Tesseract: {tesseract_path}")
-        print(f"   Excel: {excel_path}")
+        # 檢查關鍵設定
+        assert "agency" in config, "缺少 agency 設定"
+        assert "system" in config, "缺少 system 設定"
+
+        print(f"   Agency: {config['agency'].get('name', 'Unknown')}")
+        print(f"   System: {config['system'].get('title', 'Unknown')}")
 
     except Exception as e:
         raise AssertionError(f"設定檔讀取失敗: {e}")

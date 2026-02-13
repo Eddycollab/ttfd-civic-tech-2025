@@ -9,9 +9,17 @@ import sqlite3
 import datetime
 import io
 
-# 強制 stdout/stderr 使用 UTF-8 編碼
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+# 強制 stdout/stderr 使用 UTF-8 編碼 (僅在未被包裝時)
+if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    except AttributeError:
+        pass  # stdout 已經被包裝或不支援 buffer 屬性
+if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != 'utf-8':
+    try:
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+    except AttributeError:
+        pass  # stderr 已經被包裝或不支援 buffer 屬性
 
 # 設定路徑以便導入模組
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -22,9 +30,8 @@ if project_root not in sys.path:
 # 嘗試導入 db_manager
 try:
     import db_manager
-except ImportError:
-    print("❌ 無法導入 db_manager，請檢查路徑設定")
-    sys.exit(1)
+except ImportError as e:
+    raise ImportError(f"❌ 無法導入 db_manager，請檢查路徑設定: {e}")
 
 class TestMealDeliverySystem(unittest.TestCase):
 

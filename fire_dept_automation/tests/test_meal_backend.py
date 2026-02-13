@@ -9,9 +9,17 @@ import sqlite3
 import datetime
 import io
 
-# 強制 stdout/stderr 使用 UTF-8 編碼
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+# 強制 stdout/stderr 使用 UTF-8 編碼 (僅在未被包裝時)
+if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    except AttributeError:
+        pass  # stdout 已經被包裝或不支援 buffer 屬性
+if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != 'utf-8':
+    try:
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+    except AttributeError:
+        pass  # stderr 已經被包裝或不支援 buffer 屬性
 
 # 設定路徑以便導入模組
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -22,9 +30,8 @@ if project_root not in sys.path:
 # 導入 db_manager
 try:
     import db_manager
-except ImportError:
-    print("❌ 無法導入 db_manager，請檢查路徑設定")
-    sys.exit(1)
+except ImportError as e:
+    raise ImportError(f"❌ 無法導入 db_manager，請檢查路徑設定: {e}")
 
 class TestMealBackend(unittest.TestCase):
 
@@ -159,7 +166,7 @@ class TestMealBackend(unittest.TestCase):
 
         # 3. 驗證是否自動建立今日任務
         self.cursor.execute("""
-            SELECT id, route_id, assigned_volunteer_id, status, date
+            SELECT id, route_id, assigned_volunteer, status, date
             FROM daily_tasks
             WHERE date = ? AND route_id = ?
         """, (today, route_id))
@@ -172,10 +179,10 @@ class TestMealBackend(unittest.TestCase):
         # 檢查任務詳情
         self.assertEqual(task['date'], today, "任務日期應該是今天")
         self.assertEqual(task['route_id'], route_id, "任務應該屬於新路線")
-        self.assertEqual(task['assigned_volunteer_id'], test_volunteer, "任務應該指派給預設志工")
+        self.assertEqual(task['assigned_volunteer'], test_volunteer, "任務應該指派給預設志工")
         self.assertEqual(task['status'], '未配送', "任務初始狀態應該是未配送")
         print(f"   ✅ 任務日期: {task['date']}")
-        print(f"   ✅ 指派志工: {task['assigned_volunteer_id']}")
+        print(f"   ✅ 指派志工: {task['assigned_volunteer']}")
         print(f"   ✅ 任務狀態: {task['status']}")
 
         # 4. 驗證任務總數增加
