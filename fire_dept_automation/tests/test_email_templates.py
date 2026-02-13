@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import utils
 
+
 def save_html_preview(filename, html_content):
     """儲存 HTML 到檔案供預覽"""
     preview_dir = "email_previews"
@@ -20,11 +21,12 @@ def save_html_preview(filename, html_content):
         os.makedirs(preview_dir)
 
     filepath = os.path.join(preview_dir, filename)
-    with open(filepath, 'w', encoding='utf-8') as f:
+    with open(filepath, "w", encoding="utf-8") as f:
         f.write(html_content)
 
     print(f"✅ 已生成: {filepath}")
     return filepath
+
 
 def test_2fa_email():
     """測試 2FA 驗證碼郵件"""
@@ -47,10 +49,11 @@ def test_2fa_email():
         recipient_name="測試帳號",
         content_html=content,
         highlight_info="123456",
-        color_theme="#1a365d"
+        color_theme="#1a365d",
     )
 
     return save_html_preview("1_2fa_verification.html", html)
+
 
 def test_password_reset_email():
     """測試重設密碼郵件"""
@@ -74,10 +77,11 @@ def test_password_reset_email():
         recipient_name="測試帳號",
         content_html=content,
         highlight_info="abc123xyz",
-        color_theme="#e53e3e"
+        color_theme="#e53e3e",
     )
 
     return save_html_preview("2_password_reset.html", html)
+
 
 def test_case_acceptance_email():
     """測試案件受理通知郵件"""
@@ -118,19 +122,35 @@ def test_case_acceptance_email():
         recipient_name="王小明",
         content_html=content,
         highlight_info=case_id,
-        color_theme="#1a365d"
+        color_theme="#1a365d",
     )
 
     return save_html_preview("3_case_acceptance.html", html)
+
 
 def test_case_status_update_email():
     """測試案件狀態更新郵件（三種狀態）"""
     print("\n📊 測試案件狀態更新郵件...")
 
     test_cases = [
-        {"status": "可領件", "color": "#38a169", "icon": "✅", "notes": "審核通過，請於上班時間攜帶身分證件至本局預防調查科領取核定書表。"},
-        {"status": "已退件", "color": "#e53e3e", "icon": "⚠️", "notes": "申報書第3頁場所平面圖不清，請重新拍照後上傳。"},
-        {"status": "審核中", "color": "#3182ce", "icon": "ℹ️", "notes": "案件正在審核中，預計2個工作天內完成。"}
+        {
+            "status": "可領件",
+            "color": "#38a169",
+            "icon": "✅",
+            "notes": "審核通過，請於上班時間攜帶身分證件至本局預防調查科領取核定書表。",
+        },
+        {
+            "status": "已退件",
+            "color": "#e53e3e",
+            "icon": "⚠️",
+            "notes": "申報書第3頁場所平面圖不清，請重新拍照後上傳。",
+        },
+        {
+            "status": "審核中",
+            "color": "#3182ce",
+            "icon": "ℹ️",
+            "notes": "案件正在審核中，預計2個工作天內完成。",
+        },
     ]
 
     files = []
@@ -177,13 +197,14 @@ def test_case_status_update_email():
             title=f"案件狀態更新：{status}",
             recipient_name="王小明",
             content_html=content,
-            color_theme=color
+            color_theme=color,
         )
 
         filename = f"4_{idx}_status_{status}.html"
         files.append(save_html_preview(filename, html))
 
     return files
+
 
 def main():
     """執行所有測試並生成預覽檔案"""
@@ -216,10 +237,12 @@ def main():
     if files:
         try:
             import webbrowser
+
             webbrowser.open(files[0])
             print(f"\n🌐 已在瀏覽器中開啟預覽檔案")
         except:
             pass
+
 
 if __name__ == "__main__":
     main()

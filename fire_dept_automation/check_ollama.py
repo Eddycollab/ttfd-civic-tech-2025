@@ -1,9 +1,10 @@
 """檢查 Ollama 模型"""
+
 import requests
 
 try:
-    response = requests.get('http://localhost:11434/api/tags', timeout=3)
-    models = response.json().get('models', [])
+    response = requests.get("http://localhost:11434/api/tags", timeout=3)
+    models = response.json().get("models", [])
 
     print(f"\n✅ Ollama AI 運行中")
     print(f"\n已安裝模型數量: {len(models)}\n")
@@ -12,8 +13,8 @@ try:
     text_models = []
 
     for model in models:
-        name = model.get('name', 'unknown')
-        if 'vision' in name.lower():
+        name = model.get("name", "unknown")
+        if "vision" in name.lower():
             vision_models.append(name)
         else:
             text_models.append(name)

@@ -8,6 +8,7 @@ from datetime import datetime
 from typing import List, Dict, Optional
 from pathlib import Path
 
+
 # 延遲導入
 def get_docx():
     try:
@@ -16,15 +17,18 @@ def get_docx():
         from docx.enum.text import WD_ALIGN_PARAGRAPH
         from docx.enum.table import WD_TABLE_ALIGNMENT
         from docx.oxml.ns import qn
+
         return Document, Pt, Cm, RGBColor, WD_ALIGN_PARAGRAPH, qn
     except ImportError:
         raise ImportError("請安裝 python-docx: pip install python-docx")
 
 
-def create_comparison_report(comparison_results: List[Dict],
-                            output_path: str,
-                            title: str = "文件資料比對報告",
-                            include_summary: bool = True) -> str:
+def create_comparison_report(
+    comparison_results: List[Dict],
+    output_path: str,
+    title: str = "文件資料比對報告",
+    include_summary: bool = True,
+) -> str:
     """
     生成 Word 格式的比對報告
 
@@ -66,16 +70,20 @@ def create_comparison_report(comparison_results: List[Dict],
         total = len(comparison_results)
         passed = sum(1 for r in comparison_results if r.get("overall_match", False))
         failed = total - passed
-        avg_similarity = sum(r.get("overall_similarity", 0) for r in comparison_results) / total if total > 0 else 0
+        avg_similarity = (
+            sum(r.get("overall_similarity", 0) for r in comparison_results) / total
+            if total > 0
+            else 0
+        )
 
         summary_table = doc.add_table(rows=4, cols=2)
-        summary_table.style = 'Table Grid'
+        summary_table.style = "Table Grid"
 
         summary_data = [
             ("比對文件總數", str(total)),
             ("通過數量", f"{passed} ✅"),
             ("未通過數量", f"{failed} ❌"),
-            ("平均相似度", f"{avg_similarity:.1%}")
+            ("平均相似度", f"{avg_similarity:.1%}"),
         ]
 
         for i, (label, value) in enumerate(summary_data):
@@ -89,7 +97,7 @@ def create_comparison_report(comparison_results: List[Dict],
                     for run in paragraph.runs:
                         run.font.name = "標楷體"
                         run.font.size = Pt(12)
-                        run._element.rPr.rFonts.set(qn('w:eastAsia'), "標楷體")
+                        run._element.rPr.rFonts.set(qn("w:eastAsia"), "標楷體")
 
         doc.add_paragraph()
 
@@ -115,7 +123,7 @@ def create_comparison_report(comparison_results: List[Dict],
         field_comparisons = result.get("field_comparisons", [])
         if field_comparisons:
             table = doc.add_table(rows=len(field_comparisons) + 1, cols=5)
-            table.style = 'Table Grid'
+            table.style = "Table Grid"
 
             # 表頭
             headers = ["欄位名稱", "OCR 值", "參考值", "相似度", "結果"]
@@ -127,7 +135,7 @@ def create_comparison_report(comparison_results: List[Dict],
                     for run in paragraph.runs:
                         run.font.bold = True
                         run.font.name = "標楷體"
-                        run._element.rPr.rFonts.set(qn('w:eastAsia'), "標楷體")
+                        run._element.rPr.rFonts.set(qn("w:eastAsia"), "標楷體")
 
             # 資料列
             for row_idx, fc in enumerate(field_comparisons, 1):
@@ -156,7 +164,7 @@ def create_comparison_report(comparison_results: List[Dict],
                         for run in paragraph.runs:
                             run.font.name = "標楷體"
                             run.font.size = Pt(10)
-                            run._element.rPr.rFonts.set(qn('w:eastAsia'), "標楷體")
+                            run._element.rPr.rFonts.set(qn("w:eastAsia"), "標楷體")
 
         doc.add_paragraph()  # 間隔
 
@@ -172,8 +180,7 @@ def create_comparison_report(comparison_results: List[Dict],
     return output_path
 
 
-def create_simple_report(comparison_results: List[Dict],
-                        output_path: str) -> str:
+def create_simple_report(comparison_results: List[Dict], output_path: str) -> str:
     """
     生成簡易文字格式報告
 
@@ -225,7 +232,7 @@ def create_simple_report(comparison_results: List[Dict],
     lines.append("報告結束")
 
     # 寫入檔案
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
     return output_path
@@ -241,9 +248,21 @@ if __name__ == "__main__":
             "overall_similarity": 0.98,
             "summary": "✅ 所有欄位比對通過",
             "field_comparisons": [
-                {"field_name": "場所名稱", "ocr_value": "台東縣立體育場", "reference_value": "台東縣立體育場", "match_type": "exact", "similarity": 1.0},
-                {"field_name": "地址", "ocr_value": "台東市中華路684號", "reference_value": "台東市中華路684號", "match_type": "exact", "similarity": 1.0},
-            ]
+                {
+                    "field_name": "場所名稱",
+                    "ocr_value": "台東縣立體育場",
+                    "reference_value": "台東縣立體育場",
+                    "match_type": "exact",
+                    "similarity": 1.0,
+                },
+                {
+                    "field_name": "地址",
+                    "ocr_value": "台東市中華路684號",
+                    "reference_value": "台東市中華路684號",
+                    "match_type": "exact",
+                    "similarity": 1.0,
+                },
+            ],
         },
         {
             "document_id": "DOC-002",
@@ -251,10 +270,22 @@ if __name__ == "__main__":
             "overall_similarity": 0.75,
             "summary": "❌ 不符欄位: 負責人",
             "field_comparisons": [
-                {"field_name": "場所名稱", "ocr_value": "某某商店", "reference_value": "某某商店", "match_type": "exact", "similarity": 1.0},
-                {"field_name": "負責人", "ocr_value": "王小名", "reference_value": "王小明", "match_type": "similar", "similarity": 0.8},
-            ]
-        }
+                {
+                    "field_name": "場所名稱",
+                    "ocr_value": "某某商店",
+                    "reference_value": "某某商店",
+                    "match_type": "exact",
+                    "similarity": 1.0,
+                },
+                {
+                    "field_name": "負責人",
+                    "ocr_value": "王小名",
+                    "reference_value": "王小明",
+                    "match_type": "similar",
+                    "similarity": 0.8,
+                },
+            ],
+        },
     ]
 
     # 生成報告

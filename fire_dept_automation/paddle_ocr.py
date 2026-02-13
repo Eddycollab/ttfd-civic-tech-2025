@@ -10,6 +10,7 @@ import numpy as np
 _paddle_ocr_instance = None
 _paddle_available = None
 
+
 def is_paddle_available():
     """
     檢查 PaddleOCR 是否可用
@@ -25,11 +26,13 @@ def is_paddle_available():
 
     try:
         import paddleocr
+
         _paddle_available = True
         return True
     except ImportError:
         _paddle_available = False
         return False
+
 
 def initialize_paddle_ocr():
     """
@@ -55,16 +58,17 @@ def initialize_paddle_ocr():
         # use_angle_cls=True enables text angle detection
         # show_log=False suppresses verbose output
         _paddle_ocr_instance = PaddleOCR(
-            lang='chinese_cht',  # Traditional Chinese
-            use_angle_cls=True,   # Detect text rotation
-            show_log=False,       # Suppress logs
-            use_gpu=False         # Use CPU (GPU support can be enabled if available)
+            lang="chinese_cht",  # Traditional Chinese
+            use_angle_cls=True,  # Detect text rotation
+            show_log=False,  # Suppress logs
+            use_gpu=False,  # Use CPU (GPU support can be enabled if available)
         )
 
         return _paddle_ocr_instance
     except Exception as e:
         print(f"PaddleOCR initialization failed: {e}")
         return None
+
 
 def perform_paddle_ocr(image):
     """
@@ -102,12 +106,13 @@ def perform_paddle_ocr(image):
                 text_lines.append(text)
 
         # Join with newlines
-        full_text = '\n'.join(text_lines)
+        full_text = "\n".join(text_lines)
 
         return full_text
 
     except Exception as e:
         return f"PaddleOCR Error: {str(e)}"
+
 
 def get_paddle_info():
     """
@@ -117,24 +122,18 @@ def get_paddle_info():
         dict: Information about PaddleOCR installation
     """
     if not is_paddle_available():
-        return {
-            'available': False,
-            'message': 'PaddleOCR not installed'
-        }
+        return {"available": False, "message": "PaddleOCR not installed"}
 
     try:
         import paddleocr
         import paddlepaddle as paddle
 
         return {
-            'available': True,
-            'paddleocr_version': paddleocr.__version__,
-            'paddlepaddle_version': paddle.__version__,
-            'model': 'PP-OCRv5',
-            'language': 'Traditional Chinese (chinese_cht)'
+            "available": True,
+            "paddleocr_version": paddleocr.__version__,
+            "paddlepaddle_version": paddle.__version__,
+            "model": "PP-OCRv5",
+            "language": "Traditional Chinese (chinese_cht)",
         }
     except Exception as e:
-        return {
-            'available': False,
-            'error': str(e)
-        }
+        return {"available": False, "error": str(e)}

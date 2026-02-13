@@ -15,13 +15,23 @@ from datetime import datetime
 # 本地模組
 from deskew import preprocess_for_ocr
 from paddle_ocr import ocr_to_structured, get_ocr_engine
-from llm_corrector import correct_ocr_text, extract_structured_data, check_ollama_available, LLMConfig
-from compare import compare_documents, load_reference_from_excel, load_reference_from_json
+from llm_corrector import (
+    correct_ocr_text,
+    extract_structured_data,
+    check_ollama_available,
+    LLMConfig,
+)
+from compare import (
+    compare_documents,
+    load_reference_from_excel,
+    load_reference_from_json,
+)
 from report import create_comparison_report, create_simple_report
 
 # PDF 處理
 try:
     import fitz  # PyMuPDF
+
     HAS_PYMUPDF = True
 except ImportError:
     HAS_PYMUPDF = False
@@ -34,11 +44,13 @@ import numpy as np
 class OCRComparisonSystem:
     """OCR 文件比對系統"""
 
-    def __init__(self,
-                 use_gpu: bool = True,
-                 use_llm: bool = True,
-                 llm_config: Optional[LLMConfig] = None,
-                 dpi: int = 300):
+    def __init__(
+        self,
+        use_gpu: bool = True,
+        use_llm: bool = True,
+        llm_config: Optional[LLMConfig] = None,
+        dpi: int = 300,
+    ):
         """
         初始化系統
 
@@ -95,10 +107,13 @@ class OCRComparisonSystem:
         pdf_doc.close()
         return images
 
-    def process_image(self, image: Union[str, np.ndarray],
-                     do_deskew: bool = False,  # 預設關閉預處理
-                     do_enhance: bool = False,
-                     document_context: str = "") -> Dict:
+    def process_image(
+        self,
+        image: Union[str, np.ndarray],
+        do_deskew: bool = False,  # 預設關閉預處理
+        do_enhance: bool = False,
+        document_context: str = "",
+    ) -> Dict:
         """
         處理單張圖片
         """
@@ -106,7 +121,7 @@ class OCRComparisonSystem:
             "preprocessing": {},
             "ocr_result": {},
             "corrected_text": "",
-            "structured_data": {}
+            "structured_data": {},
         }
 
         # 1. 處理輸入
@@ -120,9 +135,7 @@ class OCRComparisonSystem:
         # 2. 預處理 (可選)
         if do_deskew or do_enhance:
             processed_img, preprocess_info = preprocess_for_ocr(
-                img,
-                do_deskew=do_deskew,
-                do_enhance=do_enhance
+                img, do_deskew=do_deskew, do_enhance=do_enhance
             )
             result["preprocessing"] = preprocess_info
         else:
@@ -138,7 +151,7 @@ class OCRComparisonSystem:
             corrected = correct_ocr_text(
                 ocr_result["full_text"],
                 context=document_context,
-                config=self.llm_config
+                config=self.llm_config,
             )
             result["corrected_text"] = corrected
         else:
@@ -146,9 +159,9 @@ class OCRComparisonSystem:
 
         return result
 
-    def process_pdf(self, pdf_path: str,
-                   document_context: str = "",
-                   progress_callback=None) -> List[Dict]:
+    def process_pdf(
+        self, pdf_path: str, document_context: str = "", progress_callback=None
+    ) -> List[Dict]:
         """
         處理 PDF 檔案
 
@@ -175,21 +188,20 @@ class OCRComparisonSystem:
             if progress_callback:
                 progress_callback(page_num, total_pages)
 
-            page_result = self.process_image(
-                img,
-                document_context=document_context
-            )
+            page_result = self.process_image(img, document_context=document_context)
             page_result["page_number"] = page_num
             results.append(page_result)
 
         return results
 
-    def extract_and_compare(self,
-                           pdf_path: str,
-                           reference_data: Dict,
-                           fields_to_extract: List[str],
-                           fields_to_compare: Optional[List[str]] = None,
-                           document_context: str = "") -> Dict:
+    def extract_and_compare(
+        self,
+        pdf_path: str,
+        reference_data: Dict,
+        fields_to_extract: List[str],
+        fields_to_compare: Optional[List[str]] = None,
+        document_context: str = "",
+    ) -> Dict:
         """
         完整流程：提取 PDF 資料並與參考資料比對
 
@@ -207,17 +219,18 @@ class OCRComparisonSystem:
         page_results = self.process_pdf(pdf_path, document_context)
 
         # 合併所有頁面的文字
-        all_text = "\n\n".join([
-            pr.get("corrected_text", "") or pr.get("ocr_result", {}).get("full_text", "")
-            for pr in page_results
-        ])
+        all_text = "\n\n".join(
+            [
+                pr.get("corrected_text", "")
+                or pr.get("ocr_result", {}).get("full_text", "")
+                for pr in page_results
+            ]
+        )
 
         # 使用 LLM 提取結構化資料
         if self.use_llm:
             extracted_data = extract_structured_data(
-                all_text,
-                fields_to_extract,
-                config=self.llm_config
+                all_text, fields_to_extract, config=self.llm_config
             )
         else:
             # 如果沒有 LLM，返回空白結構
@@ -231,14 +244,14 @@ class OCRComparisonSystem:
             extracted_data,
             reference_data,
             fields_to_compare,
-            document_id=Path(pdf_path).stem
+            document_id=Path(pdf_path).stem,
         )
 
         return {
             "pdf_path": pdf_path,
             "page_count": len(page_results),
             "extracted_data": extracted_data,
-            "comparison": comparison.to_dict()
+            "comparison": comparison.to_dict(),
         }
 
 
@@ -257,7 +270,7 @@ def main():
 
   # 生成比對報告
   python main.py --input scan.pdf --reference data.xlsx --report report.docx
-        """
+        """,
     )
 
     parser.add_argument("--input", "-i", required=True, help="輸入 PDF 或圖片檔案")
@@ -274,10 +287,7 @@ def main():
     args = parser.parse_args()
 
     # 初始化系統
-    system = OCRComparisonSystem(
-        use_gpu=not args.no_gpu,
-        use_llm=not args.no_llm
-    )
+    system = OCRComparisonSystem(use_gpu=not args.no_gpu, use_llm=not args.no_llm)
 
     input_path = args.input
 
@@ -290,23 +300,30 @@ def main():
 
     # 輸出 OCR 結果
     if args.output:
-        with open(args.output, 'w', encoding='utf-8') as f:
+        with open(args.output, "w", encoding="utf-8") as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
         print(f"OCR 結果已儲存: {args.output}")
 
     # 比對參考資料
     if args.reference and args.key_column and args.key_value:
-        if args.reference.endswith(('.xlsx', '.xls')):
-            ref_data = load_reference_from_excel(args.reference, args.key_column, args.key_value)
+        if args.reference.endswith((".xlsx", ".xls")):
+            ref_data = load_reference_from_excel(
+                args.reference, args.key_column, args.key_value
+            )
         else:
-            ref_data = load_reference_from_json(args.reference, args.key_column, args.key_value)
+            ref_data = load_reference_from_json(
+                args.reference, args.key_column, args.key_value
+            )
 
         if ref_data:
             # 合併所有文字
-            all_text = "\n".join([
-                r.get("corrected_text", "") or r.get("ocr_result", {}).get("full_text", "")
-                for r in results
-            ])
+            all_text = "\n".join(
+                [
+                    r.get("corrected_text", "")
+                    or r.get("ocr_result", {}).get("full_text", "")
+                    for r in results
+                ]
+            )
 
             # 提取並比對
             fields = args.fields or list(ref_data.keys())
@@ -322,7 +339,7 @@ def main():
 
                 # 生成報告
                 if args.report:
-                    if args.report.endswith('.docx'):
+                    if args.report.endswith(".docx"):
                         create_comparison_report([comparison.to_dict()], args.report)
                     else:
                         create_simple_report([comparison.to_dict()], args.report)

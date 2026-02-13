@@ -6,14 +6,14 @@ import logging
 import io
 
 # 強制 stdout/stderr 使用 UTF-8 編碼 (僅在未被包裝時)
-if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != 'utf-8':
+if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != "utf-8":
     try:
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     except AttributeError:
         pass  # stdout 已經被包裝或不支援 buffer 屬性
-if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != 'utf-8':
+if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != "utf-8":
     try:
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
     except AttributeError:
         pass  # stderr 已經被包裝或不支援 buffer 屬性
 
@@ -35,6 +35,7 @@ print(f"DEBUG: sys.path[0]: {sys.path[0]}")
 # 測試 7: 設定檔測試
 # ==========================================
 
+
 def test_config_files():
     """檢查設定檔是否存在且可讀取"""
     import config_loader as cfg
@@ -42,7 +43,7 @@ def test_config_files():
     # 測試讀取設定
     try:
         # 檢查 CONFIG 字典是否存在
-        if not hasattr(cfg, 'CONFIG'):
+        if not hasattr(cfg, "CONFIG"):
             raise AssertionError("config_loader 缺少 CONFIG 變數")
 
         config = cfg.CONFIG
@@ -56,17 +57,19 @@ def test_config_files():
     except Exception as e:
         raise AssertionError(f"設定檔讀取失敗: {e}")
 
+
 # 設定日誌
 logging.basicConfig(
-    filename='tests/test_result.log',
+    filename="tests/test_result.log",
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    encoding='utf-8'
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    encoding="utf-8",
 )
 
 # ==========================================
 # 測試輔助函式
 # ==========================================
+
 
 def run_test(test_name, test_func):
     """執行單個測試並捕獲錯誤"""
@@ -88,9 +91,11 @@ def run_test(test_name, test_func):
         logging.error(f"Test exception: {test_name} - {type(e).__name__}: {e}")
         return False
 
+
 # ==========================================
 # 測試 1: Python 語法檢查
 # ==========================================
+
 
 def test_python_syntax():
     """檢查所有 Python 檔案的語法是否正確"""
@@ -113,9 +118,11 @@ def test_python_syntax():
 
     print(f"   已檢查 {len(files_to_check)} 個核心檔案")
 
+
 # ==========================================
 # 測試 2: 核心模組導入測試
 # ==========================================
+
 
 def test_core_imports():
     """測試核心模組是否可以正常導入"""
@@ -136,9 +143,11 @@ def test_core_imports():
 
     print(f"   成功導入 {imported} 個核心模組")
 
+
 # ==========================================
 # 測試 3: 資料庫連線測試
 # ==========================================
+
 
 def test_database_connection():
     """測試資料庫連線是否正常"""
@@ -155,9 +164,11 @@ def test_database_connection():
 
     print(f"   資料庫查詢返回 {len(cases)} 筆案件")
 
+
 # ==========================================
 # 測試 4: 資料庫表結構測試
 # ==========================================
+
 
 def test_database_tables():
     """檢查所有必要的資料表是否存在"""
@@ -192,9 +203,11 @@ def test_database_tables():
 
     print(f"   確認 {len(required_tables)} 個資料表存在")
 
+
 # ==========================================
 # 測試 5: 資料庫 CRUD 函式測試
 # ==========================================
+
 
 def test_database_crud_functions():
     """測試資料庫 CRUD 函式是否存在"""
@@ -235,9 +248,11 @@ def test_database_crud_functions():
 
     print(f"   確認 {len(all_functions)} 個 CRUD 函式存在")
 
+
 # ==========================================
 # 測試 6: 頁面檔案存在性測試
 # ==========================================
+
 
 def test_page_files_exist():
     """檢查所有頁面檔案是否存在"""
@@ -265,9 +280,11 @@ def test_page_files_exist():
 
     print(f"   確認 {len(pages)} 個頁面檔案存在")
 
+
 # ==========================================
 # 測試 7: 設定檔測試
 # ==========================================
+
 
 def test_config_files():
     """檢查設定檔是否存在且可讀取"""
@@ -276,7 +293,7 @@ def test_config_files():
     # 測試讀取設定
     try:
         # 檢查 CONFIG 字典是否存在
-        if not hasattr(cfg, 'CONFIG'):
+        if not hasattr(cfg, "CONFIG"):
             # 如果沒有 CONFIG，嘗試載入
             config = cfg.load_config()
         else:
@@ -291,6 +308,7 @@ def test_config_files():
 
     except Exception as e:
         raise AssertionError(f"設定檔讀取失敗: {e}")
+
 
 # ==========================================
 # 主執行函式

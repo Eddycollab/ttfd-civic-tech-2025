@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from utils import convert_doc_to_pdf, get_libreoffice_path
 
+
 def test_conversion():
     print("Checking for LibreOffice...")
     lo_path = get_libreoffice_path()
@@ -17,12 +18,15 @@ def test_conversion():
     docx_path = os.path.abspath("test_conversion.docx")
     try:
         import docx
+
         doc = docx.Document()
         doc.add_paragraph("This is a test document for PDF conversion.")
         doc.save(docx_path)
         print(f"Created dummy DOCX at: {docx_path}")
     except ImportError:
-        print("python-docx not installed, creating an empty file (might fail conversion if strict)")
+        print(
+            "python-docx not installed, creating an empty file (might fail conversion if strict)"
+        )
         with open(docx_path, "w") as f:
             f.write("Dummy content")
 
@@ -45,6 +49,7 @@ def test_conversion():
         if os.path.exists(docx_path):
             os.remove(docx_path)
             print("Cleaned up DOCX.")
+
 
 if __name__ == "__main__":
     # Install python-docx if needed for the test

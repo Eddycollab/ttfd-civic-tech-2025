@@ -2,6 +2,7 @@
 社區送餐系統後端邏輯測試
 測試範圍：種子資料、日曆事件格式、排班認領邏輯
 """
+
 import unittest
 import sys
 import os
@@ -10,14 +11,14 @@ import datetime
 import io
 
 # 強制 stdout/stderr 使用 UTF-8 編碼 (僅在未被包裝時)
-if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != 'utf-8':
+if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != "utf-8":
     try:
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     except AttributeError:
         pass  # stdout 已經被包裝或不支援 buffer 屬性
-if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != 'utf-8':
+if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != "utf-8":
     try:
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
     except AttributeError:
         pass  # stderr 已經被包裝或不支援 buffer 屬性
 
@@ -33,14 +34,14 @@ try:
 except ImportError as e:
     raise ImportError(f"❌ 無法導入 db_manager，請檢查路徑設定: {e}")
 
-class TestMealBackend(unittest.TestCase):
 
+class TestMealBackend(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """測試開始前的準備工作"""
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("開始執行送餐系統後端邏輯測試")
-        print("="*50)
+        print("=" * 50)
 
         # 初始化資料庫
         print("🔄 執行資料庫初始化...")
@@ -113,9 +114,11 @@ class TestMealBackend(unittest.TestCase):
         task_id = db_manager.create_daily_task(today, route_id, assigned_volunteer=None)
 
         # 2. 確認初始狀態：無人認領
-        self.cursor.execute("SELECT assigned_volunteer FROM daily_tasks WHERE id = ?", (task_id,))
+        self.cursor.execute(
+            "SELECT assigned_volunteer FROM daily_tasks WHERE id = ?", (task_id,)
+        )
         result = self.cursor.fetchone()
-        self.assertIsNone(result['assigned_volunteer'], "初始狀態應該無人認領")
+        self.assertIsNone(result["assigned_volunteer"], "初始狀態應該無人認領")
         print("   ✅ 初始狀態: 無人認領")
 
         # 3. 認領任務
@@ -123,18 +126,24 @@ class TestMealBackend(unittest.TestCase):
         db_manager.claim_task(task_id, test_user)
 
         # 驗證
-        self.cursor.execute("SELECT assigned_volunteer FROM daily_tasks WHERE id = ?", (task_id,))
+        self.cursor.execute(
+            "SELECT assigned_volunteer FROM daily_tasks WHERE id = ?", (task_id,)
+        )
         result = self.cursor.fetchone()
-        self.assertEqual(result['assigned_volunteer'], test_user, f"應該被 {test_user} 認領")
+        self.assertEqual(
+            result["assigned_volunteer"], test_user, f"應該被 {test_user} 認領"
+        )
         print(f"   ✅ 認領成功: {test_user}")
 
         # 4. 釋出任務
         db_manager.release_task(task_id)
 
         # 驗證
-        self.cursor.execute("SELECT assigned_volunteer FROM daily_tasks WHERE id = ?", (task_id,))
+        self.cursor.execute(
+            "SELECT assigned_volunteer FROM daily_tasks WHERE id = ?", (task_id,)
+        )
         result = self.cursor.fetchone()
-        self.assertIsNone(result['assigned_volunteer'], "釋出後應該變回 None")
+        self.assertIsNone(result["assigned_volunteer"], "釋出後應該變回 None")
         print("   ✅ 釋出成功: 已變回無人認領")
 
         # 清理測試資料
@@ -155,21 +164,28 @@ class TestMealBackend(unittest.TestCase):
         # 2. 建立新路線 (應該自動建立今日任務)
         test_route_name = "建和線_測試"
         test_volunteer = "admin"
-        route_id = db_manager.create_delivery_route(test_route_name, "測試用路線", test_volunteer)
+        route_id = db_manager.create_delivery_route(
+            test_route_name, "測試用路線", test_volunteer
+        )
 
         # 驗證路線建立成功
         self.assertIsNotNone(route_id, "路線應該建立成功")
-        self.cursor.execute("SELECT route_name FROM delivery_routes WHERE id = ?", (route_id,))
+        self.cursor.execute(
+            "SELECT route_name FROM delivery_routes WHERE id = ?", (route_id,)
+        )
         result = self.cursor.fetchone()
-        self.assertEqual(result['route_name'], test_route_name, "路線名稱應該正確")
+        self.assertEqual(result["route_name"], test_route_name, "路線名稱應該正確")
         print(f"   ✅ 路線建立成功: {test_route_name} (ID: {route_id})")
 
         # 3. 驗證是否自動建立今日任務
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
             SELECT id, route_id, assigned_volunteer, status, date
             FROM daily_tasks
             WHERE date = ? AND route_id = ?
-        """, (today, route_id))
+        """,
+            (today, route_id),
+        )
         task = self.cursor.fetchone()
 
         # 檢查任務是否存在
@@ -177,10 +193,12 @@ class TestMealBackend(unittest.TestCase):
         print(f"   ✅ 自動建立今日任務成功 (Task ID: {task['id']})")
 
         # 檢查任務詳情
-        self.assertEqual(task['date'], today, "任務日期應該是今天")
-        self.assertEqual(task['route_id'], route_id, "任務應該屬於新路線")
-        self.assertEqual(task['assigned_volunteer'], test_volunteer, "任務應該指派給預設志工")
-        self.assertEqual(task['status'], '未配送', "任務初始狀態應該是未配送")
+        self.assertEqual(task["date"], today, "任務日期應該是今天")
+        self.assertEqual(task["route_id"], route_id, "任務應該屬於新路線")
+        self.assertEqual(
+            task["assigned_volunteer"], test_volunteer, "任務應該指派給預設志工"
+        )
+        self.assertEqual(task["status"], "未配送", "任務初始狀態應該是未配送")
         print(f"   ✅ 任務日期: {task['date']}")
         print(f"   ✅ 指派志工: {task['assigned_volunteer']}")
         print(f"   ✅ 任務狀態: {task['status']}")
@@ -188,7 +206,9 @@ class TestMealBackend(unittest.TestCase):
         # 4. 驗證任務總數增加
         self.cursor.execute("SELECT COUNT(*) FROM daily_tasks WHERE date = ?", (today,))
         final_task_count = self.cursor.fetchone()[0]
-        self.assertEqual(final_task_count, initial_task_count + 1, "今日任務數應該增加 1")
+        self.assertEqual(
+            final_task_count, initial_task_count + 1, "今日任務數應該增加 1"
+        )
         print(f"   ✅ 今日任務總數: {initial_task_count} → {final_task_count}")
 
         # 清理測試資料
@@ -197,5 +217,6 @@ class TestMealBackend(unittest.TestCase):
         self.conn.commit()
         print("   🧹 測試資料已清理")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(verbosity=2)

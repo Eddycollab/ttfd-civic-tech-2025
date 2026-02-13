@@ -3,6 +3,7 @@ import os
 
 DB_NAME = "cases.db"
 
+
 def migrate_add_is_archived():
     """
     為 cases 表新增 is_archived 欄位
@@ -20,7 +21,7 @@ def migrate_add_is_archived():
         c.execute("PRAGMA table_info(cases)")
         columns = [column[1] for column in c.fetchall()]
 
-        if 'is_archived' in columns:
+        if "is_archived" in columns:
             print("✅ is_archived 欄位已存在，無需遷移")
             return True
 
@@ -34,7 +35,7 @@ def migrate_add_is_archived():
         c.execute("PRAGMA table_info(cases)")
         columns_after = [column[1] for column in c.fetchall()]
 
-        if 'is_archived' in columns_after:
+        if "is_archived" in columns_after:
             print("✅ 驗證通過：is_archived 欄位已成功加入資料庫")
             return True
         else:
@@ -52,9 +53,10 @@ def migrate_add_is_archived():
         print(f"❌ 未預期的錯誤: {e}")
         return False
     finally:
-        if 'conn' in locals():
+        if "conn" in locals():
             conn.close()
             print("📁 資料庫連線已關閉")
+
 
 if __name__ == "__main__":
     print("=" * 50)

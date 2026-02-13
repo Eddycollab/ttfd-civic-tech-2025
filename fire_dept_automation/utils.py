@@ -14,7 +14,8 @@ import config_loader as cfg
 # 簡繁轉換工具
 try:
     from opencc import OpenCC
-    _opencc_converter = OpenCC('s2tw')  # Simplified to Traditional (Taiwan)
+
+    _opencc_converter = OpenCC("s2tw")  # Simplified to Traditional (Taiwan)
     _opencc_available = True
 except ImportError:
     _opencc_converter = None
@@ -24,9 +25,11 @@ except ImportError:
 # UI 樣式函式
 # ==========================================
 
+
 def load_custom_css():
     """載入全域自定義 CSS 樣式，提升使用者介面體驗"""
-    st.markdown("""
+    st.markdown(
+        """
     <style>
         /* 1. 放大側邊欄導航字體 */
         [data-testid="stSidebarNav"] span {
@@ -246,7 +249,10 @@ def load_custom_css():
             white-space: nowrap;
         }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
+
 
 # ==========================================
 # 設定區
@@ -256,31 +262,36 @@ LOCAL_TESSDATA_DIR = os.path.join(os.getcwd(), "tessdata")
 
 # 定義標準設備清單 (依長度排序，優先比對長字串)
 # 根據消防安全設備檢修申報書目錄標準項目
-VALID_EQUIPMENT_LIST = sorted([
-    "滅火器",
-    "室內消防栓設備",
-    "室外消防栓設備",
-    "自動撒水設備",
-    "水霧滅火設備",
-    "泡沫滅火設備",
-    "二氧化碳滅火設備",
-    "乾粉滅火設備",
-    "海龍滅火設備(含海龍替代品)",
-    "火警自動警報設備",
-    "瓦斯漏氣火警自動警報設備",
-    "緊急廣播設備",
-    "標示設備",
-    "避難器具",
-    "緊急照明設備",
-    "連結送水管",
-    "消防專用蓄水池",
-    "排煙設備",
-    "無線電通信輔助設備"
-], key=len, reverse=True)
+VALID_EQUIPMENT_LIST = sorted(
+    [
+        "滅火器",
+        "室內消防栓設備",
+        "室外消防栓設備",
+        "自動撒水設備",
+        "水霧滅火設備",
+        "泡沫滅火設備",
+        "二氧化碳滅火設備",
+        "乾粉滅火設備",
+        "海龍滅火設備(含海龍替代品)",
+        "火警自動警報設備",
+        "瓦斯漏氣火警自動警報設備",
+        "緊急廣播設備",
+        "標示設備",
+        "避難器具",
+        "緊急照明設備",
+        "連結送水管",
+        "消防專用蓄水池",
+        "排煙設備",
+        "無線電通信輔助設備",
+    ],
+    key=len,
+    reverse=True,
+)
 
 # ==========================================
 # 簡繁轉換函式
 # ==========================================
+
 
 def convert_to_traditional(text):
     """
@@ -318,22 +329,24 @@ def convert_to_traditional(text):
     else:
         return text
 
+
 # ==========================================
 # 函式區
 # ==========================================
+
 
 def send_email(sender_email, sender_password, receiver_email, subject, body):
     """發送 Email 通知"""
     try:
         msg = MIMEMultipart()
-        msg['From'] = sender_email
-        msg['To'] = receiver_email
-        msg['Subject'] = subject
+        msg["From"] = sender_email
+        msg["To"] = receiver_email
+        msg["Subject"] = subject
 
-        msg.attach(MIMEText(body, 'html'))
+        msg.attach(MIMEText(body, "html"))
 
         # 連線到 Gmail SMTP Server (使用 SSL)
-        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
         server.login(sender_email, sender_password)
         server.send_message(msg)
         server.quit()
@@ -341,7 +354,10 @@ def send_email(sender_email, sender_password, receiver_email, subject, body):
     except Exception as e:
         return False, f"發送失敗: {e}"
 
-def generate_email_html(title, recipient_name, content_html, highlight_info=None, color_theme="#1a365d"):
+
+def generate_email_html(
+    title, recipient_name, content_html, highlight_info=None, color_theme="#1a365d"
+):
     """
     生成統一的 HTML 郵件模板（臺東縣消防局標準格式）
 
@@ -426,6 +442,7 @@ def generate_email_html(title, recipient_name, content_html, highlight_info=None
 """
     return html
 
+
 def download_lang_data():
     """下載繁體中文語言包"""
     if not os.path.exists(LOCAL_TESSDATA_DIR):
@@ -457,11 +474,12 @@ def download_lang_data():
             # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected
             urllib.request.urlretrieve(eng_url, eng_dest)
         except:
-            pass # 英文非必要，失敗就算了
+            pass  # 英文非必要，失敗就算了
 
 
 import shutil
 import uuid
+
 
 def get_default_tesseract_path():
     """自動偵測 Tesseract 執行檔路徑"""
@@ -470,7 +488,7 @@ def get_default_tesseract_path():
         r"D:\Program Files\Tesseract-OCR\tesseract.exe",
         r"E:\Program Files\Tesseract-OCR\tesseract.exe",
         r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
-        r"D:\Program Files (x86)\Tesseract-OCR\tesseract.exe"
+        r"D:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
     ]
 
     for path in possible_paths:
@@ -480,9 +498,11 @@ def get_default_tesseract_path():
     # 若都找不到，返回預設第一個路徑（即使不存在）
     return possible_paths[0] if possible_paths else ""
 
+
 def get_default_excel_path():
     """回傳預設的系統列管 Excel 路徑"""
     return r"d:\下載\downloads\00. 列管場所資料.xls"
+
 
 def render_equipment_diff(sys_set, ocr_set):
     """
@@ -519,6 +539,7 @@ def render_equipment_diff(sys_set, ocr_set):
     html += "</div>"
     return html
 
+
 @st.cache_data
 def load_system_data(excel_path):
     """讀取系統列管資料 Excel (使用複製策略以避免檔案鎖定)"""
@@ -532,13 +553,18 @@ def load_system_data(excel_path):
         shutil.copy2(excel_path, temp_path)
 
         # 2. 讀取暫存檔
-        if excel_path.endswith('.xls'):
-            df = pd.read_excel(temp_path, header=1, engine='xlrd')
+        if excel_path.endswith(".xls"):
+            df = pd.read_excel(temp_path, header=1, engine="xlrd")
         else:
             df = pd.read_excel(temp_path, header=1)
 
         # 清理欄位名稱 (去除前後空白、換行符號)
-        df.columns = df.columns.astype(str).str.strip().str.replace('\n', '').str.replace('\r', '')
+        df.columns = (
+            df.columns.astype(str)
+            .str.strip()
+            .str.replace("\n", "")
+            .str.replace("\r", "")
+        )
         return df
 
     except Exception as e:
@@ -551,16 +577,17 @@ def load_system_data(excel_path):
             try:
                 os.remove(temp_path)
             except:
-                pass # 刪除失敗不影響流程
+                pass  # 刪除失敗不影響流程
+
 
 def pdf_to_images(pdf_file, dpi=300):
     """將 PDF 轉為圖片列表 (每一頁一張圖)"""
     # 如果是 bytes (從 DB 或 upload 讀取)，直接用
     # 如果是 file-like object，用 .read()
-    if hasattr(pdf_file, 'read'):
+    if hasattr(pdf_file, "read"):
         stream = pdf_file.read()
     else:
-        stream = pdf_file # 假設已經是 bytes 或路徑
+        stream = pdf_file  # 假設已經是 bytes 或路徑
 
     # fitz.open 支援路徑或 stream
     if isinstance(stream, str):
@@ -571,10 +598,11 @@ def pdf_to_images(pdf_file, dpi=300):
     images = []
     for page_num in range(len(doc)):
         page = doc.load_page(page_num)
-        pix = page.get_pixmap(dpi=dpi) # 高解析度以利 OCR
+        pix = page.get_pixmap(dpi=dpi)  # 高解析度以利 OCR
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
         images.append(img)
     return images
+
 
 def perform_ocr(image, tesseract_cmd):
     """對圖片進行 OCR 辨識"""
@@ -586,33 +614,31 @@ def perform_ocr(image, tesseract_cmd):
             tesseract_cmd,
             temp_img_path,
             "stdout",
-            "-l", "chi_tra+eng",
-            "--tessdata-dir", LOCAL_TESSDATA_DIR
+            "-l",
+            "chi_tra+eng",
+            "--tessdata-dir",
+            LOCAL_TESSDATA_DIR,
         ]
 
         startupinfo = subprocess.STARTUPINFO()
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
-        process = subprocess.run(
-            cmd,
-            capture_output=True,
-            startupinfo=startupinfo
-        )
+        process = subprocess.run(cmd, capture_output=True, startupinfo=startupinfo)
 
         stdout_data = process.stdout
         stderr_data = process.stderr
 
         if process.returncode != 0:
             try:
-                err_msg = stderr_data.decode('utf-8')
+                err_msg = stderr_data.decode("utf-8")
             except:
-                err_msg = stderr_data.decode('cp950', errors='ignore')
+                err_msg = stderr_data.decode("cp950", errors="ignore")
             return f"OCR Error (Code {process.returncode}): {err_msg}"
 
         try:
-            text = stdout_data.decode('utf-8')
+            text = stdout_data.decode("utf-8")
         except UnicodeDecodeError:
-            text = stdout_data.decode('cp950', errors='ignore')
+            text = stdout_data.decode("cp950", errors="ignore")
 
         return text
 
@@ -624,6 +650,7 @@ def perform_ocr(image, tesseract_cmd):
                 os.remove(temp_img_path)
             except:
                 pass
+
 
 def normalize_equipment_str(text):
     """將輸入的文字進行模糊比對，只保留標準設備清單中的項目"""
@@ -639,16 +666,18 @@ def normalize_equipment_str(text):
 
     return "、".join(found_items)
 
+
 def extract_info_from_ocr(text, pages_text_list=None):
     """從 OCR 文字中提取關鍵資訊"""
     info = {}
 
     # --- 第一頁解析 (基本資料) ---
     if text:
-        lines = text.split('\n')
+        lines = text.split("\n")
         for line in lines:
             clean_line = line.replace(" ", "").replace("　", "").strip()
-            if not clean_line: continue
+            if not clean_line:
+                continue
 
             # 1. 管理權人
             if "管理權人" in clean_line:
@@ -656,49 +685,53 @@ def extract_info_from_ocr(text, pages_text_list=None):
                 if match:
                     val = match.group(1)
                     if "通訊處" not in val:
-                        info['管理權人'] = val
+                        info["管理權人"] = val
 
             # 備用：找 "姓名"
-            if "姓名" in clean_line and "檢修人員" not in clean_line and "管理權人" not in info:
-                 match = re.search(r"姓名[:：|](.*)", clean_line)
-                 if match:
-                     val = match.group(1)
-                     if "身分證" in val:
-                         val = val.split("身分證")[0]
-                     info['管理權人'] = val
+            if (
+                "姓名" in clean_line
+                and "檢修人員" not in clean_line
+                and "管理權人" not in info
+            ):
+                match = re.search(r"姓名[:：|](.*)", clean_line)
+                if match:
+                    val = match.group(1)
+                    if "身分證" in val:
+                        val = val.split("身分證")[0]
+                    info["管理權人"] = val
 
             # 2. 地址
             if "地址" in clean_line:
-                 if "場所地址" in clean_line:
-                     match = re.search(r"場所地址[:：|](.*)", clean_line)
-                     if match:
-                         info['場所地址'] = match.group(1)
-                 elif "地址" in clean_line and '場所地址' not in info:
-                     match = re.search(r"地址[:：|](.*)", clean_line)
-                     if match:
-                         info['場所地址'] = match.group(1)
+                if "場所地址" in clean_line:
+                    match = re.search(r"場所地址[:：|](.*)", clean_line)
+                    if match:
+                        info["場所地址"] = match.group(1)
+                elif "地址" in clean_line and "場所地址" not in info:
+                    match = re.search(r"地址[:：|](.*)", clean_line)
+                    if match:
+                        info["場所地址"] = match.group(1)
 
             # 3. 電話
             if "電話" in clean_line:
-                if '場所電話' not in info:
+                if "場所電話" not in info:
                     match = re.search(r"電話[:：|]([\d\-\(\)\s]+)", clean_line)
                     if match:
                         val = match.group(1).strip()
                         if any(char.isdigit() for char in val):
-                            info['場所電話'] = val
+                            info["場所電話"] = val
 
             # 4. 場所名稱
             if "場所名稱" in clean_line:
                 match = re.search(r"場所名稱[:：|](.*)", clean_line)
                 if match:
-                    info['場所名稱'] = match.group(1)
+                    info["場所名稱"] = match.group(1)
 
             # 5. 消防設備種類 (第一頁備用)
             if not pages_text_list:
                 if "申報項目" in clean_line or "檢修項目" in clean_line:
-                     match = re.search(r"(申報項目|檢修項目)[:：|](.*)", clean_line)
-                     if match:
-                         info['消防設備種類'] = normalize_equipment_str(match.group(2))
+                    match = re.search(r"(申報項目|檢修項目)[:：|](.*)", clean_line)
+                    if match:
+                        info["消防設備種類"] = normalize_equipment_str(match.group(2))
 
     # --- 多頁解析 (尋找消防設備種類) ---
     if pages_text_list and isinstance(pages_text_list, list):
@@ -717,12 +750,12 @@ def extract_info_from_ocr(text, pages_text_list=None):
             checked_equipment = []
 
             # 擴充的勾選符號清單（包含各種可能的打勾標記）
-            checked_markers = ['✓', '☑', 'v', 'V', '√', '✔', '☒', '▣', '■', '●', '✅']
+            checked_markers = ["✓", "☑", "v", "V", "√", "✔", "☒", "▣", "■", "●", "✅"]
             # 空白方框符號（這些代表未勾選，應該排除）
-            unchecked_markers = ['☐', '□', '▢', '▫', '▪']
+            unchecked_markers = ["☐", "□", "▢", "▫", "▪"]
 
             # 將文字按行分割
-            lines = target_page_text.split('\n')
+            lines = target_page_text.split("\n")
 
             for line in lines:
                 # 【重要】先檢查是否包含空白方框 - 如果有，跳過這一行
@@ -736,16 +769,20 @@ def extract_info_from_ocr(text, pages_text_list=None):
 
                     # 使用 normalize_equipment_str 從這一行提取標準設備名稱
                     for equipment in VALID_EQUIPMENT_LIST:
-                        if equipment in clean_line or equipment.replace("設備", "") in clean_line:
+                        if (
+                            equipment in clean_line
+                            or equipment.replace("設備", "") in clean_line
+                        ):
                             if equipment not in checked_equipment:
                                 checked_equipment.append(equipment)
                                 break
 
             # 轉換為字串格式
             if checked_equipment:
-                info['消防設備種類'] = "、".join(checked_equipment)
+                info["消防設備種類"] = "、".join(checked_equipment)
 
     return info
+
 
 def save_delivery_photo(uploaded_file, task_id):
     """
@@ -775,6 +812,7 @@ def save_delivery_photo(uploaded_file, task_id):
 
     return file_path
 
+
 def save_proof_photo(file_buffer, task_id, current_user=None):
     """
     儲存送達證明照片（強制拍照模式）
@@ -789,7 +827,7 @@ def save_proof_photo(file_buffer, task_id, current_user=None):
 
     Returns:
         str: 儲存的檔案相對路徑
-        
+
     Raises:
         PermissionError: 當使用者無權限上傳該任務照片時
     """
@@ -806,17 +844,21 @@ def save_proof_photo(file_buffer, task_id, current_user=None):
         conn = db_manager.get_connection()
         try:
             c = conn.cursor()
-            c.execute('SELECT assigned_volunteer FROM daily_tasks WHERE id = ?', (task_id,))
+            c.execute(
+                "SELECT assigned_volunteer FROM daily_tasks WHERE id = ?", (task_id,)
+            )
             task = c.fetchone()
-            
+
             if not task:
                 raise ValueError(f"任務 ID {task_id} 不存在")
-            
-            assigned_volunteer = task['assigned_volunteer']
-            
+
+            assigned_volunteer = task["assigned_volunteer"]
+
             # 只有被分配的志工才能上傳照片
             if assigned_volunteer != current_user:
-                raise PermissionError(f"權限不足：此任務不屬於您（任務負責人：{assigned_volunteer or '未分配'}）")
+                raise PermissionError(
+                    f"權限不足：此任務不屬於您（任務負責人：{assigned_volunteer or '未分配'}）"
+                )
         finally:
             conn.close()
 
@@ -835,13 +877,14 @@ def save_proof_photo(file_buffer, task_id, current_user=None):
     safe_task_id = os.path.basename(str(task_id))
     # 2. Additional validation: only allow alphanumeric, underscore, and hyphen
     import re
-    safe_task_id = re.sub(r'[^a-zA-Z0-9_\-]', '', safe_task_id)
+
+    safe_task_id = re.sub(r"[^a-zA-Z0-9_\-]", "", safe_task_id)
     if not safe_task_id:
         safe_task_id = "unknown"
-    
+
     filename = f"{safe_task_id}_{timestamp}.jpg"
     file_path = os.path.join(upload_dir, filename)
-    
+
     # Security Fix: Validate final path is within the expected directory
     # Use realpath to resolve any symlinks and normalize the path
     real_upload_dir = os.path.realpath(upload_dir)
@@ -876,13 +919,14 @@ def save_proof_photo(file_buffer, task_id, current_user=None):
             f.write(file_buffer.getbuffer())
         return file_path
 
+
 def get_libreoffice_path():
     """自動偵測 LibreOffice 執行檔路徑"""
     possible_paths = [
         r"C:\Program Files\LibreOffice\program\soffice.exe",
         r"C:\Program Files (x86)\LibreOffice\program\soffice.exe",
         r"D:\Program Files\LibreOffice\program\soffice.exe",
-        r"D:\Program Files (x86)\LibreOffice\program\soffice.exe"
+        r"D:\Program Files (x86)\LibreOffice\program\soffice.exe",
     ]
 
     # 也可以嘗試從環境變數或 where 指令找 (這裡先簡單實作)
@@ -890,6 +934,7 @@ def get_libreoffice_path():
         if os.path.exists(path):
             return path
     return None
+
 
 def convert_doc_to_pdf_libreoffice(doc_path, libreoffice_path):
     """使用 LibreOffice 將 Word 轉 PDF (Headless 模式，不開啟視窗)"""
@@ -905,9 +950,11 @@ def convert_doc_to_pdf_libreoffice(doc_path, libreoffice_path):
     cmd = [
         libreoffice_path,
         "--headless",
-        "--convert-to", "pdf",
-        "--outdir", output_dir,
-        doc_path
+        "--convert-to",
+        "pdf",
+        "--outdir",
+        output_dir,
+        doc_path,
     ]
 
     try:
@@ -923,9 +970,12 @@ def convert_doc_to_pdf_libreoffice(doc_path, libreoffice_path):
             raise Exception("LibreOffice 轉換失敗：未產生 PDF 檔案")
 
     except subprocess.CalledProcessError as e:
-        raise Exception(f"LibreOffice 執行錯誤: {e.stderr.decode('utf-8', errors='ignore')}")
+        raise Exception(
+            f"LibreOffice 執行錯誤: {e.stderr.decode('utf-8', errors='ignore')}"
+        )
     except Exception as e:
         raise Exception(f"LibreOffice 轉換發生例外: {str(e)}")
+
 
 def convert_doc_to_pdf(doc_path):
     """
@@ -952,12 +1002,15 @@ def convert_doc_to_pdf(doc_path):
 
     # --- FIX: 解決 Word "上次開啟造成嚴重錯誤" 的對話框 ---
     # 策略：將原始檔案複製一份到暫存檔 (使用隨機檔名)，讓 Word 認為是新檔案
-    temp_doc_path = os.path.join(os.path.dirname(doc_path), f"temp_word_{uuid.uuid4().hex[:8]}{os.path.splitext(doc_path)[1]}")
+    temp_doc_path = os.path.join(
+        os.path.dirname(doc_path),
+        f"temp_word_{uuid.uuid4().hex[:8]}{os.path.splitext(doc_path)[1]}",
+    )
     shutil.copy2(doc_path, temp_doc_path)
     # ---------------------------------------------------
 
     # 處理路徑中的特殊字符 (PowerShell Escape)
-    ps_doc_path = temp_doc_path.replace("'", "''") # 使用暫存檔路徑
+    ps_doc_path = temp_doc_path.replace("'", "''")  # 使用暫存檔路徑
     ps_pdf_path = pdf_path.replace("'", "''")
 
     # PowerShell Script
@@ -985,7 +1038,14 @@ def convert_doc_to_pdf(doc_path):
 
     # 執行 PowerShell
     try:
-        cmd = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps_script]
+        cmd = [
+            "powershell",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            ps_script,
+        ]
         # 設定 startupinfo 隱藏視窗 (Windows only)
         startupinfo = subprocess.STARTUPINFO()
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -996,7 +1056,7 @@ def convert_doc_to_pdf(doc_path):
             capture_output=True,
             text=True,
             startupinfo=startupinfo,
-            timeout=60  # 60 秒超時
+            timeout=60,  # 60 秒超時
         )
 
         if result.returncode != 0:
@@ -1010,18 +1070,24 @@ def convert_doc_to_pdf(doc_path):
     except subprocess.TimeoutExpired:
         # 超時錯誤
         if os.path.exists(pdf_path):
-            try: os.remove(pdf_path)
-            except: pass
+            try:
+                os.remove(pdf_path)
+            except:
+                pass
         raise Exception("Word 轉換超時 (>60秒)，請檢查文件大小或嘗試直接上傳 PDF")
 
     except Exception as e:
         # 如果失敗，嘗試清理
         if os.path.exists(pdf_path):
-            try: os.remove(pdf_path)
-            except: pass
+            try:
+                os.remove(pdf_path)
+            except:
+                pass
         raise e
     finally:
         # 清理暫存的 Word 檔案
         if os.path.exists(temp_doc_path):
-            try: os.remove(temp_doc_path)
-            except: pass
+            try:
+                os.remove(temp_doc_path)
+            except:
+                pass

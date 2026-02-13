@@ -16,16 +16,18 @@ import unicodedata
 
 class MatchType(Enum):
     """比對結果類型"""
-    EXACT = "exact"         # 完全相符
-    SIMILAR = "similar"     # 相似 (模糊比對)
-    MISMATCH = "mismatch"   # 不符
-    MISSING = "missing"     # 缺失
-    EXTRA = "extra"         # 多餘
+
+    EXACT = "exact"  # 完全相符
+    SIMILAR = "similar"  # 相似 (模糊比對)
+    MISMATCH = "mismatch"  # 不符
+    MISSING = "missing"  # 缺失
+    EXTRA = "extra"  # 多餘
 
 
 @dataclass
 class FieldComparison:
     """單一欄位的比對結果"""
+
     field_name: str
     ocr_value: Any
     reference_value: Any
@@ -37,6 +39,7 @@ class FieldComparison:
 @dataclass
 class ComparisonResult:
     """完整的比對結果"""
+
     document_id: str = ""
     overall_match: bool = False
     overall_similarity: float = 0.0
@@ -56,11 +59,11 @@ class ComparisonResult:
                     "reference_value": fc.reference_value,
                     "match_type": fc.match_type.value,
                     "similarity": round(fc.similarity, 4),
-                    "details": fc.details
+                    "details": fc.details,
                 }
                 for fc in self.field_comparisons
             ],
-            "summary": self.summary
+            "summary": self.summary,
         }
 
 
@@ -77,18 +80,18 @@ def normalize_text(text: str) -> str:
     text = str(text).strip()
 
     # 統一全形轉半形 (數字、英文)
-    text = unicodedata.normalize('NFKC', text)
+    text = unicodedata.normalize("NFKC", text)
 
     # 移除多餘空白
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"\s+", " ", text)
 
     # 統一常見變體
     replacements = {
-        '臺': '台',  # 統一台/臺
-        '－': '-',
-        '—': '-',
-        '：': ':',
-        '；': ';',
+        "臺": "台",  # 統一台/臺
+        "－": "-",
+        "—": "-",
+        "：": ":",
+        "；": ";",
     }
     for old, new in replacements.items():
         text = text.replace(old, new)
@@ -121,10 +124,9 @@ def calculate_similarity(str1: str, str2: str) -> float:
     return SequenceMatcher(None, norm1, norm2).ratio()
 
 
-def compare_field(field_name: str,
-                 ocr_value: Any,
-                 reference_value: Any,
-                 threshold: float = 0.85) -> FieldComparison:
+def compare_field(
+    field_name: str, ocr_value: Any, reference_value: Any, threshold: float = 0.85
+) -> FieldComparison:
     """
     比對單一欄位
 
@@ -145,7 +147,7 @@ def compare_field(field_name: str,
             reference_value=reference_value,
             match_type=MatchType.EXACT,
             similarity=1.0,
-            details="兩者皆為空值"
+            details="兩者皆為空值",
         )
 
     if ocr_value is None:
@@ -155,7 +157,7 @@ def compare_field(field_name: str,
             reference_value=reference_value,
             match_type=MatchType.MISSING,
             similarity=0.0,
-            details="OCR 未提取到此欄位"
+            details="OCR 未提取到此欄位",
         )
 
     if reference_value is None:
@@ -165,7 +167,7 @@ def compare_field(field_name: str,
             reference_value=reference_value,
             match_type=MatchType.EXTRA,
             similarity=0.0,
-            details="參考資料無此欄位"
+            details="參考資料無此欄位",
         )
 
     # 計算相似度
@@ -188,15 +190,17 @@ def compare_field(field_name: str,
         reference_value=reference_value,
         match_type=match_type,
         similarity=similarity,
-        details=details
+        details=details,
     )
 
 
-def compare_documents(ocr_data: Dict,
-                     reference_data: Dict,
-                     fields_to_compare: Optional[List[str]] = None,
-                     threshold: float = 0.85,
-                     document_id: str = "") -> ComparisonResult:
+def compare_documents(
+    ocr_data: Dict,
+    reference_data: Dict,
+    fields_to_compare: Optional[List[str]] = None,
+    threshold: float = 0.85,
+    document_id: str = "",
+) -> ComparisonResult:
     """
     比對 OCR 結果與參考資料
 
@@ -239,11 +243,13 @@ def compare_documents(ocr_data: Dict,
 
     # 生成摘要
     mismatch_fields = [
-        fc.field_name for fc in result.field_comparisons
+        fc.field_name
+        for fc in result.field_comparisons
         if fc.match_type == MatchType.MISMATCH
     ]
     missing_fields = [
-        fc.field_name for fc in result.field_comparisons
+        fc.field_name
+        for fc in result.field_comparisons
         if fc.match_type == MatchType.MISSING
     ]
 
@@ -260,9 +266,9 @@ def compare_documents(ocr_data: Dict,
     return result
 
 
-def load_reference_from_excel(excel_path: str,
-                             key_column: str,
-                             key_value: str) -> Optional[Dict]:
+def load_reference_from_excel(
+    excel_path: str, key_column: str, key_value: str
+) -> Optional[Dict]:
     """
     從 Excel 載入參考資料
 
@@ -294,9 +300,9 @@ def load_reference_from_excel(excel_path: str,
         raise RuntimeError(f"讀取 Excel 失敗: {e}")
 
 
-def load_reference_from_json(json_path: str,
-                            key_field: str,
-                            key_value: str) -> Optional[Dict]:
+def load_reference_from_json(
+    json_path: str, key_field: str, key_value: str
+) -> Optional[Dict]:
     """
     從 JSON 檔案載入參考資料
 
@@ -308,7 +314,7 @@ def load_reference_from_json(json_path: str,
     Returns:
         找到的資料 (字典形式)
     """
-    with open(json_path, 'r', encoding='utf-8') as f:
+    with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     # 如果是列表，搜尋匹配項
@@ -329,14 +335,14 @@ if __name__ == "__main__":
         "場所名稱": "臺東縣立體育場",
         "地址": "台東市中華路一段684號",
         "負責人": "王大明",
-        "電話": "089-123456"
+        "電話": "089-123456",
     }
 
     reference = {
         "場所名稱": "台東縣立體育場",
         "地址": "臺東市中華路一段684號",
         "負責人": "王大明",
-        "電話": "089-123456"
+        "電話": "089-123456",
     }
 
     print("OCR 結果:", ocr_result)
@@ -352,4 +358,6 @@ if __name__ == "__main__":
 
     print("欄位詳情:")
     for fc in result.field_comparisons:
-        print(f"  {fc.field_name}: {fc.match_type.value} ({fc.similarity:.2%}) - {fc.details}")
+        print(
+            f"  {fc.field_name}: {fc.match_type.value} ({fc.similarity:.2%}) - {fc.details}"
+        )

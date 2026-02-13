@@ -7,11 +7,13 @@ import time
 
 DB_NAME = "cases.db"
 
+
 def get_connection():
     """建立資料庫連線"""
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row  # 讓回傳結果可以用欄位名稱存取
     return conn
+
 
 def migrate_database():
     """
@@ -26,7 +28,7 @@ def migrate_database():
         c.execute("PRAGMA table_info(cases)")
         columns = [column[1] for column in c.fetchall()]
 
-        if 'assigned_to' not in columns:
+        if "assigned_to" not in columns:
             print("⚠️ 偵測到舊資料庫，正在執行遷移...")
             c.execute("ALTER TABLE cases ADD COLUMN assigned_to TEXT")
             conn.commit()
@@ -37,7 +39,7 @@ def migrate_database():
         columns = [column[1] for column in c.fetchall()]
 
         # 檢查 cases 表是否有 line_id 欄位（使用者自訂 ID）
-        if 'line_id' not in columns:
+        if "line_id" not in columns:
             print("⚠️ 正在新增 line_id 欄位...")
             c.execute("ALTER TABLE cases ADD COLUMN line_id TEXT")
             conn.commit()
@@ -48,7 +50,7 @@ def migrate_database():
         columns = [column[1] for column in c.fetchall()]
 
         # 檢查 cases 表是否有 line_user_id 欄位（LINE Messaging API 用）
-        if 'line_user_id' not in columns:
+        if "line_user_id" not in columns:
             print("⚠️ 正在新增 line_user_id 欄位（LINE Messaging API）...")
             c.execute("ALTER TABLE cases ADD COLUMN line_user_id TEXT")
             conn.commit()
@@ -59,7 +61,7 @@ def migrate_database():
         columns = [column[1] for column in c.fetchall()]
 
         # 檢查 cases 表是否有 is_archived 欄位（封存功能）
-        if 'is_archived' not in columns:
+        if "is_archived" not in columns:
             print("⚠️ 正在新增 is_archived 欄位（封存功能）...")
             c.execute("ALTER TABLE cases ADD COLUMN is_archived INTEGER DEFAULT 0")
             conn.commit()
@@ -68,16 +70,18 @@ def migrate_database():
         # 檢查 elderly_profiles 表是否有 sequence 欄位
         c.execute("PRAGMA table_info(elderly_profiles)")
         columns = [column[1] for column in c.fetchall()]
-        if columns and 'sequence' not in columns:
+        if columns and "sequence" not in columns:
             print("⚠️ 正在新增 sequence 欄位 (elderly_profiles)...")
-            c.execute("ALTER TABLE elderly_profiles ADD COLUMN sequence INTEGER DEFAULT 0")
+            c.execute(
+                "ALTER TABLE elderly_profiles ADD COLUMN sequence INTEGER DEFAULT 0"
+            )
             conn.commit()
             print("✅ 已新增 sequence 欄位")
 
         # 檢查 delivery_records 表是否有 volunteer_id 欄位
         c.execute("PRAGMA table_info(delivery_records)")
         columns = [column[1] for column in c.fetchall()]
-        if columns and 'volunteer_id' not in columns:
+        if columns and "volunteer_id" not in columns:
             print("⚠️ 正在新增 volunteer_id 欄位 (delivery_records)...")
             c.execute("ALTER TABLE delivery_records ADD COLUMN volunteer_id TEXT")
             conn.commit()
@@ -86,7 +90,7 @@ def migrate_database():
         # 檢查 delivery_records 表是否有 abnormal_reason 欄位
         c.execute("PRAGMA table_info(delivery_records)")
         columns = [column[1] for column in c.fetchall()]
-        if columns and 'abnormal_reason' not in columns:
+        if columns and "abnormal_reason" not in columns:
             print("⚠️ 正在新增 abnormal_reason 欄位 (delivery_records)...")
             c.execute("ALTER TABLE delivery_records ADD COLUMN abnormal_reason TEXT")
             conn.commit()
@@ -95,16 +99,18 @@ def migrate_database():
         # 檢查 elderly_profiles 表是否有 diet_type 欄位
         c.execute("PRAGMA table_info(elderly_profiles)")
         columns = [column[1] for column in c.fetchall()]
-        if columns and 'diet_type' not in columns:
+        if columns and "diet_type" not in columns:
             print("⚠️ 正在新增 diet_type 欄位 (elderly_profiles)...")
-            c.execute("ALTER TABLE elderly_profiles ADD COLUMN diet_type TEXT DEFAULT '一般'")
+            c.execute(
+                "ALTER TABLE elderly_profiles ADD COLUMN diet_type TEXT DEFAULT '一般'"
+            )
             conn.commit()
             print("✅ 已新增 diet_type 欄位")
 
         # 檢查 delivery_records 表是否有 photo_path 欄位
         c.execute("PRAGMA table_info(delivery_records)")
         columns = [column[1] for column in c.fetchall()]
-        if columns and 'photo_path' not in columns:
+        if columns and "photo_path" not in columns:
             print("⚠️ 正在新增 photo_path 欄位 (delivery_records)...")
             c.execute("ALTER TABLE delivery_records ADD COLUMN photo_path TEXT")
             conn.commit()
@@ -153,6 +159,7 @@ def backup_database():
         print(f"❌ 資料庫備份失敗: {e}")
         return None
 
+
 def cleanup_old_backups(backup_dir, max_backups=30):
     """
     清理舊備份檔案
@@ -172,7 +179,7 @@ def cleanup_old_backups(backup_dir, max_backups=30):
             backup_files.sort(key=lambda x: os.path.getmtime(x))
 
             # 計算需要刪除的數量
-            files_to_delete = backup_files[:len(backup_files) - max_backups]
+            files_to_delete = backup_files[: len(backup_files) - max_backups]
 
             # 刪除舊備份
             for old_file in files_to_delete:
@@ -182,6 +189,7 @@ def cleanup_old_backups(backup_dir, max_backups=30):
             print(f"✅ 備份清理完成，保留最新 {max_backups} 個備份")
     except Exception as e:
         print(f"⚠️ 備份清理失敗: {e}")
+
 
 def archive_cases(case_ids):
     """
@@ -200,15 +208,18 @@ def archive_cases(case_ids):
     c = conn.cursor()
     try:
         # 使用參數化查詢防止 SQL 注入 (placeholders 為程式產生的 '?' 字元)
-        placeholders = ','.join(['?' for _ in case_ids])
+        placeholders = ",".join(["?" for _ in case_ids])
         # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query
-        c.execute(f"UPDATE cases SET is_archived = 1 WHERE id IN ({placeholders})", case_ids)
+        c.execute(
+            f"UPDATE cases SET is_archived = 1 WHERE id IN ({placeholders})", case_ids
+        )
         conn.commit()
         return True, f"成功封存 {len(case_ids)} 筆案件"
     except Exception as e:
         return False, f"封存失敗: {e}"
     finally:
         conn.close()
+
 
 def seed_meal_data():
     """若資料表為空，寫入測試資料"""
@@ -225,26 +236,33 @@ def seed_meal_data():
 
         # 1. 建立測試帳號 volunteer1
         import auth
+
         c.execute("SELECT * FROM users WHERE username = 'volunteer1'")
         if not c.fetchone():
             print("👤 建立測試帳號: volunteer1 / 123")
             salt, hash_value = auth.hash_password("123")
-            c.execute("""
+            c.execute(
+                """
                 INSERT INTO users (username, password_salt, password_hash, role, email)
                 VALUES (?, ?, ?, ?, ?)
-            """, ("volunteer1", salt, hash_value, "volunteer", "volunteer1@example.com"))
+            """,
+                ("volunteer1", salt, hash_value, "volunteer", "volunteer1@example.com"),
+            )
             conn.commit()
 
         # 2. Routes
         routes = [
             ("建和線", "建和社區方向", "volunteer1"),  # 指派給 volunteer1
             ("溫泉線", "知本溫泉方向", "josh"),
-            ("市區線", "台東市區", None)
+            ("市區線", "台東市區", None),
         ]
 
         route_ids = []
         for name, desc, volunteer in routes:
-            c.execute("INSERT INTO delivery_routes (route_name, description, default_volunteer_id) VALUES (?, ?, ?)", (name, desc, volunteer))
+            c.execute(
+                "INSERT INTO delivery_routes (route_name, description, default_volunteer_id) VALUES (?, ?, ?)",
+                (name, desc, volunteer),
+            )
             route_ids.append(c.lastrowid)
 
         # 2. Elderly
@@ -253,11 +271,14 @@ def seed_meal_data():
             ("李奶奶", "台東市建和路20號", "素食", route_ids[0], 2),
             ("王伯伯", "台東市溫泉路5號", "切碎", route_ids[1], 1),
             ("陳阿姨", "台東市溫泉路18號", "低鹽", route_ids[1], 2),
-            ("林爺爺", "台東市中華路一段100號", "一般", route_ids[2], 1)
+            ("林爺爺", "台東市中華路一段100號", "一般", route_ids[2], 1),
         ]
 
         for name, addr, diet, rid, seq in elderly_data:
-            c.execute("INSERT INTO elderly_profiles (name, address, diet_type, route_id, sequence) VALUES (?, ?, ?, ?, ?)", (name, addr, diet, rid, seq))
+            c.execute(
+                "INSERT INTO elderly_profiles (name, address, diet_type, route_id, sequence) VALUES (?, ?, ?, ?, ?)",
+                (name, addr, diet, rid, seq),
+            )
 
         # 3. Today's Tasks (確保包含今天)
         today = datetime.date.today().strftime("%Y-%m-%d")
@@ -268,17 +289,23 @@ def seed_meal_data():
             route_id = route_ids[i]
             # Use default volunteer if available
             assigned = volunteer
-            c.execute("INSERT INTO daily_tasks (date, route_id, assigned_volunteer, status) VALUES (?, ?, ?, ?)",
-                      (today, route_id, assigned, "待執行"))
+            c.execute(
+                "INSERT INTO daily_tasks (date, route_id, assigned_volunteer, status) VALUES (?, ?, ?, ?)",
+                (today, route_id, assigned, "待執行"),
+            )
 
         # 也建立未來1週的排班 (用於日曆測試)
         for day_offset in range(1, 8):
-            future_date = (datetime.date.today() + datetime.timedelta(days=day_offset)).strftime("%Y-%m-%d")
+            future_date = (
+                datetime.date.today() + datetime.timedelta(days=day_offset)
+            ).strftime("%Y-%m-%d")
             for i, (name, desc, volunteer) in enumerate(routes):
                 route_id = route_ids[i]
                 # 未來的任務不指派，留給志工認領
-                c.execute("INSERT INTO daily_tasks (date, route_id, assigned_volunteer, status) VALUES (?, ?, ?, ?)",
-                          (future_date, route_id, None, "待執行"))
+                c.execute(
+                    "INSERT INTO daily_tasks (date, route_id, assigned_volunteer, status) VALUES (?, ?, ?, ?)",
+                    (future_date, route_id, None, "待執行"),
+                )
 
         conn.commit()
         print("✅ 測試資料寫入完成 (包含今天與未來7天)")
@@ -287,6 +314,7 @@ def seed_meal_data():
     finally:
         conn.close()
 
+
 def init_db():
     """初始化資料庫：建立案件資料表"""
     # 在初始化之前先備份現有資料庫（如果存在）
@@ -294,7 +322,7 @@ def init_db():
 
     conn = get_connection()
     c = conn.cursor()
-    c.execute('''
+    c.execute("""
         CREATE TABLE IF NOT EXISTS cases (
             id TEXT PRIMARY KEY,
             applicant_name TEXT NOT NULL,
@@ -311,10 +339,10 @@ def init_db():
             line_user_id TEXT,
             is_archived INTEGER DEFAULT 0
         )
-    ''')
+    """)
 
     # Create users table
-    c.execute('''
+    c.execute("""
         CREATE TABLE IF NOT EXISTS users (
             username TEXT PRIMARY KEY,
             password_salt TEXT NOT NULL,
@@ -324,10 +352,10 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             last_login TIMESTAMP
         )
-    ''')
+    """)
 
     # Create audit_logs table
-    c.execute('''
+    c.execute("""
         CREATE TABLE IF NOT EXISTS audit_logs (
             log_id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL,
@@ -335,10 +363,10 @@ def init_db():
             details TEXT,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    """)
 
     # Create elderly_profiles table (送餐系統：長者資料)
-    c.execute('''
+    c.execute("""
         CREATE TABLE IF NOT EXISTS elderly_profiles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -353,10 +381,10 @@ def init_db():
             status TEXT DEFAULT '啟用',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    """)
 
     # Create delivery_routes table (送餐系統：送餐路線)
-    c.execute('''
+    c.execute("""
         CREATE TABLE IF NOT EXISTS delivery_routes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             route_name TEXT NOT NULL,
@@ -366,10 +394,10 @@ def init_db():
             estimated_time INTEGER DEFAULT 60,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    """)
 
     # Create daily_tasks table (送餐系統：每日排班)
-    c.execute('''
+    c.execute("""
         CREATE TABLE IF NOT EXISTS daily_tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             date TEXT NOT NULL,
@@ -380,10 +408,10 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (route_id) REFERENCES delivery_routes(id)
         )
-    ''')
+    """)
 
     # Create delivery_records table (送餐系統：送達紀錄)
-    c.execute('''
+    c.execute("""
         CREATE TABLE IF NOT EXISTS delivery_records (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             task_id INTEGER NOT NULL,
@@ -397,10 +425,10 @@ def init_db():
             FOREIGN KEY (task_id) REFERENCES daily_tasks(id),
             FOREIGN KEY (elderly_id) REFERENCES elderly_profiles(id)
         )
-    ''')
+    """)
 
     # Create museum_bookings table (防災館預約系統)
-    c.execute('''
+    c.execute("""
         CREATE TABLE IF NOT EXISTS museum_bookings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             visit_date TEXT NOT NULL,
@@ -413,7 +441,7 @@ def init_db():
             status TEXT DEFAULT '已預約',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    """)
 
     conn.commit()
     conn.close()
@@ -427,42 +455,54 @@ def init_db():
     # Initialize default admin if no users exist
     init_admin_user()
 
+
 def init_admin_user():
     """Initialize default admin user if users table is empty"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT count(*) FROM users')
+    c.execute("SELECT count(*) FROM users")
     if c.fetchone()[0] == 0:
         import auth
+
         # 從環境變數讀取預設密碼，若無則使用隨機生成的臨時密碼
         default_password = os.environ.get("ADMIN_DEFAULT_PASSWORD")
         if not default_password:
             # 生成隨機臨時密碼
             import secrets
+
             default_password = secrets.token_urlsafe(12)
             print(f"⚠️ 警告：已生成臨時管理員密碼，請立即更改！")
             print(f"⚠️ 請使用密碼重置工具 (reset_admin_tool.py) 設置管理員密碼")
         salt, pwd_hash = auth.hash_password(default_password)
-        c.execute('''
+        c.execute(
+            """
             INSERT INTO users (username, password_salt, password_hash, role, email)
             VALUES (?, ?, ?, ?, ?)
-        ''', ("admin", salt, pwd_hash, "admin", "admin@example.com"))
+        """,
+            ("admin", salt, pwd_hash, "admin", "admin@example.com"),
+        )
         conn.commit()
         print("✅ Default admin user created. Please change password immediately!")
     conn.close()
 
+
 # --- User Management ---
+
 
 def create_user(username, password, role, email):
     import auth
+
     conn = get_connection()
     c = conn.cursor()
     salt, pwd_hash = auth.hash_password(password)
     try:
-        c.execute('''
+        c.execute(
+            """
             INSERT INTO users (username, password_salt, password_hash, role, email)
             VALUES (?, ?, ?, ?, ?)
-        ''', (username, salt, pwd_hash, role, email))
+        """,
+            (username, salt, pwd_hash, role, email),
+        )
         conn.commit()
         return True, "User created successfully"
     except sqlite3.IntegrityError:
@@ -470,38 +510,52 @@ def create_user(username, password, role, email):
     finally:
         conn.close()
 
+
 def get_user(username):
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT * FROM users WHERE username = ?', (username,))
+    c.execute("SELECT * FROM users WHERE username = ?", (username,))
     user = c.fetchone()
     conn.close()
     return user
 
+
 def update_user_password(username, new_password):
     import auth
+
     conn = get_connection()
     c = conn.cursor()
     salt, pwd_hash = auth.hash_password(new_password)
-    c.execute('UPDATE users SET password_salt = ?, password_hash = ? WHERE username = ?', (salt, pwd_hash, username))
+    c.execute(
+        "UPDATE users SET password_salt = ?, password_hash = ? WHERE username = ?",
+        (salt, pwd_hash, username),
+    )
     conn.commit()
     conn.close()
+
 
 def update_last_login(username):
     conn = get_connection()
     c = conn.cursor()
-    c.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE username = ?', (username,))
+    c.execute(
+        "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE username = ?",
+        (username,),
+    )
     conn.commit()
     conn.close()
+
 
 def get_all_users():
     """取得所有使用者資料（完整資訊）"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT username, role, email, created_at, last_login FROM users ORDER BY created_at DESC')
+    c.execute(
+        "SELECT username, role, email, created_at, last_login FROM users ORDER BY created_at DESC"
+    )
     users = c.fetchall()
     conn.close()
     return users
+
 
 def get_all_usernames():
     """
@@ -512,29 +566,39 @@ def get_all_usernames():
     """
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT username FROM users ORDER BY username ASC')
+    c.execute("SELECT username FROM users ORDER BY username ASC")
     users = [row[0] for row in c.fetchall()]
     conn.close()
     return users
 
+
 # --- Audit Logs ---
+
 
 def add_log(username, action, details=""):
     conn = get_connection()
     c = conn.cursor()
-    c.execute('INSERT INTO audit_logs (username, action, details) VALUES (?, ?, ?)', (username, action, details))
+    c.execute(
+        "INSERT INTO audit_logs (username, action, details) VALUES (?, ?, ?)",
+        (username, action, details),
+    )
     conn.commit()
     conn.close()
+
 
 def get_audit_logs():
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT 100') # Limit to last 100 logs for performance
+    c.execute(
+        "SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT 100"
+    )  # Limit to last 100 logs for performance
     logs = c.fetchall()
     conn.close()
     return logs
 
+
 # --- Case Management ---
+
 
 def create_case(name, email, phone, place_name, place_address, file_path, line_id=None):
     """建立新案件，回傳案件單號"""
@@ -542,11 +606,24 @@ def create_case(name, email, phone, place_name, place_address, file_path, line_i
     c = conn.cursor()
     case_id = str(uuid.uuid4())[:8]  # 產生 8 位隨機單號
     try:
-        c.execute('''
+        c.execute(
+            """
             INSERT INTO cases (id, applicant_name, applicant_email, applicant_phone,
                              place_name, place_address, file_path, line_id, status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (case_id, name, email, phone, place_name, place_address, file_path, line_id, '待分案'))
+        """,
+            (
+                case_id,
+                name,
+                email,
+                phone,
+                place_name,
+                place_address,
+                file_path,
+                line_id,
+                "待分案",
+            ),
+        )
         conn.commit()
         return case_id
     except Exception as e:
@@ -555,38 +632,50 @@ def create_case(name, email, phone, place_name, place_address, file_path, line_i
     finally:
         conn.close()
 
+
 def get_case_by_id(case_id):
     """依單號查詢案件"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT * FROM cases WHERE id = ?', (case_id,))
+    c.execute("SELECT * FROM cases WHERE id = ?", (case_id,))
     case = c.fetchone()
     conn.close()
     return case
+
 
 def get_cases_by_email(email):
     """依 Email 查詢案件"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT * FROM cases WHERE applicant_email = ? ORDER BY submission_date DESC', (email,))
+    c.execute(
+        "SELECT * FROM cases WHERE applicant_email = ? ORDER BY submission_date DESC",
+        (email,),
+    )
     cases = c.fetchall()
     conn.close()
     return cases
+
 
 def get_cases_by_phone(phone):
     """依電話查詢案件"""
     conn = get_connection()
     c = conn.cursor()
     # 移除電話中的符號以便模糊比對
-    clean_phone = phone.replace("-", "").replace(" ", "").replace("(", "").replace(")", "")
-    c.execute('''
+    clean_phone = (
+        phone.replace("-", "").replace(" ", "").replace("(", "").replace(")", "")
+    )
+    c.execute(
+        """
         SELECT * FROM cases
         WHERE REPLACE(REPLACE(REPLACE(REPLACE(applicant_phone, '-', ''), ' ', ''), '(', ''), ')', '') LIKE ?
         ORDER BY submission_date DESC
-    ''', (f'%{clean_phone}%',))
+    """,
+        (f"%{clean_phone}%",),
+    )
     cases = c.fetchall()
     conn.close()
     return cases
+
 
 def get_all_cases(status_filter=None, include_archived=False):
     """取得所有案件 (管理者用)"""
@@ -600,15 +689,16 @@ def get_all_cases(status_filter=None, include_archived=False):
     if status_filter and status_filter != "全部":
         sql += " AND status = ?"
         params.append(status_filter)
-    
+
     sql += " ORDER BY submission_date DESC"
-    
+
     # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query
     c.execute(sql, params)
-    
+
     cases = c.fetchall()
     conn.close()
     return cases
+
 
 def get_cases_by_assignee(username, status_filter=None, include_archived=False):
     """取得指派給特定同仁的案件 (用於權限控管)"""
@@ -632,26 +722,35 @@ def get_cases_by_assignee(username, status_filter=None, include_archived=False):
     conn.close()
     return cases
 
+
 def update_case_status(case_id, new_status, notes=None):
     """更新案件狀態"""
     conn = get_connection()
     c = conn.cursor()
 
     if notes:
-        c.execute('UPDATE cases SET status = ?, review_notes = ? WHERE id = ?', (new_status, notes, case_id))
+        c.execute(
+            "UPDATE cases SET status = ?, review_notes = ? WHERE id = ?",
+            (new_status, notes, case_id),
+        )
     else:
-        c.execute('UPDATE cases SET status = ? WHERE id = ?', (new_status, case_id))
+        c.execute("UPDATE cases SET status = ? WHERE id = ?", (new_status, case_id))
 
     conn.commit()
     conn.close()
+
 
 def update_case_info(case_id, place_name, applicant_name):
     """更新案件基本資料 (Inline Edit)"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('UPDATE cases SET place_name = ?, applicant_name = ? WHERE id = ?', (place_name, applicant_name, case_id))
+    c.execute(
+        "UPDATE cases SET place_name = ?, applicant_name = ? WHERE id = ?",
+        (place_name, applicant_name, case_id),
+    )
     conn.commit()
     conn.close()
+
 
 def update_case_assignment(case_id_list, username):
     """
@@ -672,12 +771,15 @@ def update_case_assignment(case_id_list, username):
         for case_id in case_id_list:
             # 1. 更新承辦人
             # 2. 如果狀態是 '待分案'，自動改為 '審核中'
-            c.execute('''
+            c.execute(
+                """
                 UPDATE cases
                 SET assigned_to = ?,
                     status = CASE WHEN status = '待分案' THEN '審核中' ELSE status END
                 WHERE id = ?
-            ''', (username, case_id))
+            """,
+                (username, case_id),
+            )
 
             if c.rowcount > 0:
                 updated_count += 1
@@ -690,49 +792,83 @@ def update_case_assignment(case_id_list, username):
 
     return updated_count
 
+
 def delete_case(case_id):
     """刪除案件"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('DELETE FROM cases WHERE id = ?', (case_id,))
+    c.execute("DELETE FROM cases WHERE id = ?", (case_id,))
     conn.commit()
     conn.close()
+
 
 # ==========================================
 # 送餐系統資料庫函式 (Meal Delivery System)
 # ==========================================
 
+
 # --- 長者資料管理 ---
-def create_elderly_profile(name, address, phone, gps_lat=None, gps_lon=None, diet_type="", special_notes="", route_id=None, sequence=0):
+def create_elderly_profile(
+    name,
+    address,
+    phone,
+    gps_lat=None,
+    gps_lon=None,
+    diet_type="",
+    special_notes="",
+    route_id=None,
+    sequence=0,
+):
     """建立長者資料"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('''
+    c.execute(
+        """
         INSERT INTO elderly_profiles (name, address, phone, gps_lat, gps_lon, diet_type, special_notes, route_id, sequence)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (name, address, phone, gps_lat, gps_lon, diet_type, special_notes, route_id, sequence))
+    """,
+        (
+            name,
+            address,
+            phone,
+            gps_lat,
+            gps_lon,
+            diet_type,
+            special_notes,
+            route_id,
+            sequence,
+        ),
+    )
     elderly_id = c.lastrowid
     conn.commit()
     conn.close()
     return elderly_id
 
+
 def get_all_elderly():
     """取得所有啟用中的長者資料"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT * FROM elderly_profiles WHERE status = "啟用" ORDER BY route_id, name')
+    c.execute(
+        'SELECT * FROM elderly_profiles WHERE status = "啟用" ORDER BY route_id, name'
+    )
     profiles = c.fetchall()
     conn.close()
     return profiles
+
 
 def get_elderly_by_route(route_id):
     """取得特定路線的長者名單"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT * FROM elderly_profiles WHERE route_id = ? AND status = "啟用" ORDER BY id', (route_id,))
+    c.execute(
+        'SELECT * FROM elderly_profiles WHERE route_id = ? AND status = "啟用" ORDER BY id',
+        (route_id,),
+    )
     profiles = c.fetchall()
     conn.close()
     return profiles
+
 
 def update_elderly_profile_fields(profile_id, updates):
     """
@@ -743,8 +879,18 @@ def update_elderly_profile_fields(profile_id, updates):
         return
 
     # 白名單驗證欄位名稱，防止 SQL 注入
-    ALLOWED_FIELDS = ['name', 'address', 'phone', 'gps_lat', 'gps_lon',
-                      'diet_type', 'special_notes', 'route_id', 'sequence', 'status']
+    ALLOWED_FIELDS = [
+        "name",
+        "address",
+        "phone",
+        "gps_lat",
+        "gps_lon",
+        "diet_type",
+        "special_notes",
+        "route_id",
+        "sequence",
+        "status",
+    ]
 
     # 過濾掉不在白名單中的欄位
     safe_updates = {k: v for k, v in updates.items() if k in ALLOWED_FIELDS}
@@ -770,6 +916,7 @@ def update_elderly_profile_fields(profile_id, updates):
     finally:
         conn.close()
 
+
 def delete_elderly_profile(profile_id):
     """刪除長者資料 (軟刪除)"""
     conn = get_connection()
@@ -778,6 +925,7 @@ def delete_elderly_profile(profile_id):
     conn.commit()
     conn.close()
 
+
 # --- 送餐路線管理 ---
 def create_delivery_route(route_name, description="", default_volunteer_id=None):
     """建立送餐路線，並自動建立今日的排班任務"""
@@ -785,18 +933,24 @@ def create_delivery_route(route_name, description="", default_volunteer_id=None)
     c = conn.cursor()
     try:
         # 1. 建立路線
-        c.execute('''
+        c.execute(
+            """
             INSERT INTO delivery_routes (route_name, description, default_volunteer_id)
             VALUES (?, ?, ?)
-        ''', (route_name, description, default_volunteer_id))
+        """,
+            (route_name, description, default_volunteer_id),
+        )
         route_id = c.lastrowid
 
         # 2. 自動建立今日任務
         today = datetime.date.today().strftime("%Y-%m-%d")
-        c.execute('''
+        c.execute(
+            """
             INSERT INTO daily_tasks (date, route_id, assigned_volunteer, status)
             VALUES (?, ?, ?, ?)
-        ''', (today, route_id, default_volunteer_id, '未配送'))
+        """,
+            (today, route_id, default_volunteer_id, "未配送"),
+        )
 
         conn.commit()
         return route_id
@@ -807,106 +961,137 @@ def create_delivery_route(route_name, description="", default_volunteer_id=None)
     finally:
         conn.close()
 
+
 def get_all_routes():
     """取得所有路線"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT * FROM delivery_routes ORDER BY route_name')
+    c.execute("SELECT * FROM delivery_routes ORDER BY route_name")
     routes = c.fetchall()
     conn.close()
     return routes
+
 
 def update_route_stop_count(route_id):
     """更新路線的站點數量"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT COUNT(*) FROM elderly_profiles WHERE route_id = ? AND status = "啟用"', (route_id,))
+    c.execute(
+        'SELECT COUNT(*) FROM elderly_profiles WHERE route_id = ? AND status = "啟用"',
+        (route_id,),
+    )
     count = c.fetchone()[0]
-    c.execute('UPDATE delivery_routes SET num_stops = ? WHERE id = ?', (count, route_id))
+    c.execute(
+        "UPDATE delivery_routes SET num_stops = ? WHERE id = ?", (count, route_id)
+    )
     conn.commit()
     conn.close()
+
 
 # --- 每日任務管理 ---
 def create_daily_task(date, route_id, assigned_volunteer=None):
     """建立每日送餐任務"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('''
+    c.execute(
+        """
         INSERT INTO daily_tasks (date, route_id, assigned_volunteer, status)
         VALUES (?, ?, ?, "待執行")
-    ''', (date, route_id, assigned_volunteer))
+    """,
+        (date, route_id, assigned_volunteer),
+    )
     task_id = c.lastrowid
     conn.commit()
     conn.close()
     return task_id
 
+
 def get_tasks_by_date(date):
     """取得特定日期的所有任務"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('''
+    c.execute(
+        """
         SELECT dt.*, dr.route_name, dr.num_stops
         FROM daily_tasks dt
         JOIN delivery_routes dr ON dt.route_id = dr.id
         WHERE dt.date = ?
         ORDER BY dr.route_name
-    ''', (date,))
+    """,
+        (date,),
+    )
     tasks = c.fetchall()
     conn.close()
     return tasks
+
 
 def get_tasks_by_date_range(start_date, end_date):
     """取得指定日期範圍內的所有任務 (用於行事曆)"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('''
+    c.execute(
+        """
         SELECT dt.*, dr.route_name, dr.description
         FROM daily_tasks dt
         JOIN delivery_routes dr ON dt.route_id = dr.id
         WHERE dt.date BETWEEN ? AND ?
         ORDER BY dt.date, dr.route_name
-    ''', (start_date, end_date))
+    """,
+        (start_date, end_date),
+    )
     tasks = c.fetchall()
     conn.close()
     return tasks
+
 
 def get_my_tasks_today(username, date):
     """取得當前使用者今日的任務"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('''
+    c.execute(
+        """
         SELECT dt.*, dr.route_name, dr.num_stops
         FROM daily_tasks dt
         JOIN delivery_routes dr ON dt.route_id = dr.id
         WHERE dt.assigned_volunteer = ? AND dt.date = ?
-    ''', (username, date))
+    """,
+        (username, date),
+    )
     tasks = c.fetchall()
     conn.close()
     return tasks
+
 
 def update_task_volunteer(task_id, new_volunteer):
     """更改任務的志工"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('UPDATE daily_tasks SET assigned_volunteer = ? WHERE id = ?', (new_volunteer, task_id))
+    c.execute(
+        "UPDATE daily_tasks SET assigned_volunteer = ? WHERE id = ?",
+        (new_volunteer, task_id),
+    )
     conn.commit()
     conn.close()
+
 
 def update_task_status(task_id, status):
     """更新任務狀態"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('UPDATE daily_tasks SET status = ? WHERE id = ?', (status, task_id))
+    c.execute("UPDATE daily_tasks SET status = ? WHERE id = ?", (status, task_id))
     conn.commit()
     conn.close()
+
 
 def claim_task(task_id, username):
     """認領任務 (包裝器函式供測試使用)"""
     update_task_volunteer(task_id, username)
 
+
 def release_task(task_id):
     """釋出任務 (包裝器函式供測試使用)"""
     update_task_volunteer(task_id, None)
+
 
 def get_task_events(start_date, end_date, current_user=None):
     """
@@ -924,10 +1109,10 @@ def get_task_events(start_date, end_date, current_user=None):
     events = []
 
     for task in tasks:
-        volunteer = task['assigned_volunteer']
-        route_name = task['route_name']
-        task_date = str(task['date']) # Ensure string format YYYY-MM-DD
-        task_id = task['id']
+        volunteer = task["assigned_volunteer"]
+        route_name = task["route_name"]
+        task_date = str(task["date"])  # Ensure string format YYYY-MM-DD
+        task_id = task["id"]
 
         # 顏色邏輯
         if not volunteer:
@@ -943,59 +1128,82 @@ def get_task_events(start_date, end_date, current_user=None):
             color = "#3788d8"
             title = f"👤 {route_name} ({volunteer})"
 
-        events.append({
-            "title": title,
-            "start": task_date,
-            "allDay": True,
-            "backgroundColor": color,
-            "borderColor": color,
-            "extendedProps": {
-                "taskId": task_id,
-                "currentVolunteer": volunteer,
-                "routeId": task['route_id'],
-                "routeName": route_name
+        events.append(
+            {
+                "title": title,
+                "start": task_date,
+                "allDay": True,
+                "backgroundColor": color,
+                "borderColor": color,
+                "extendedProps": {
+                    "taskId": task_id,
+                    "currentVolunteer": volunteer,
+                    "routeId": task["route_id"],
+                    "routeName": route_name,
+                },
             }
-        })
+        )
 
     return events
 
+
 # --- 送達紀錄管理 ---
-def create_delivery_record(task_id, elderly_id, status="已送達", notes="", photo_path=None, volunteer_id=None, abnormal_reason=None):
+def create_delivery_record(
+    task_id,
+    elderly_id,
+    status="已送達",
+    notes="",
+    photo_path=None,
+    volunteer_id=None,
+    abnormal_reason=None,
+):
     """建立送達紀錄"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('''
+    c.execute(
+        """
         INSERT INTO delivery_records (task_id, elderly_id, status, notes, photo_path, volunteer_id, abnormal_reason)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (task_id, elderly_id, status, notes, photo_path, volunteer_id, abnormal_reason))
+    """,
+        (task_id, elderly_id, status, notes, photo_path, volunteer_id, abnormal_reason),
+    )
     record_id = c.lastrowid
     conn.commit()
     conn.close()
     return record_id
 
+
 def get_delivery_records_by_task(task_id):
     """取得特定任務的所有送達紀錄"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('''
+    c.execute(
+        """
         SELECT dr.*, ep.name as elderly_name, ep.address
         FROM delivery_records dr
         JOIN elderly_profiles ep ON dr.elderly_id = ep.id
         WHERE dr.task_id = ?
         ORDER BY dr.delivery_time
-    ''', (task_id,))
+    """,
+        (task_id,),
+    )
     records = c.fetchall()
     conn.close()
     return records
+
 
 def check_delivery_status(task_id, elderly_id):
     """檢查是否已送達"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT id FROM delivery_records WHERE task_id = ? AND elderly_id = ?', (task_id, elderly_id))
+    c.execute(
+        "SELECT id FROM delivery_records WHERE task_id = ? AND elderly_id = ?",
+        (task_id, elderly_id),
+    )
     record = c.fetchone()
     conn.close()
     return record is not None
+
 
 def get_delivery_reports(start_date, end_date):
     """
@@ -1004,7 +1212,8 @@ def get_delivery_reports(start_date, end_date):
     """
     conn = get_connection()
     c = conn.cursor()
-    c.execute('''
+    c.execute(
+        """
         SELECT
             dt.date,
             dr.route_name,
@@ -1021,73 +1230,114 @@ def get_delivery_reports(start_date, end_date):
         JOIN delivery_routes dr ON dt.route_id = dr.id
         WHERE dt.date BETWEEN ? AND ?
         ORDER BY dt.date DESC, dr.route_name, ep.sequence
-    ''', (start_date, end_date))
+    """,
+        (start_date, end_date),
+    )
 
     rows = c.fetchall()
     conn.close()
     return rows
 
+
 # ==========================================
 # 防災館預約系統資料庫函式 (Museum Booking System)
 # ==========================================
 
-def create_museum_booking(visit_date, time_slot, applicant_name, applicant_phone, visitor_count, organization="", email=""):
+
+def create_museum_booking(
+    visit_date,
+    time_slot,
+    applicant_name,
+    applicant_phone,
+    visitor_count,
+    organization="",
+    email="",
+):
     """建立防災館參觀預約"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('''
+    c.execute(
+        """
         INSERT INTO museum_bookings (visit_date, time_slot, applicant_name, applicant_phone, visitor_count, organization, email)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (visit_date, time_slot, applicant_name, applicant_phone, visitor_count, organization, email))
+    """,
+        (
+            visit_date,
+            time_slot,
+            applicant_name,
+            applicant_phone,
+            visitor_count,
+            organization,
+            email,
+        ),
+    )
     booking_id = c.lastrowid
     conn.commit()
     conn.close()
     return booking_id
 
+
 def get_bookings_by_date(visit_date):
     """取得特定日期的所有預約"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT * FROM museum_bookings WHERE visit_date = ? AND status != "已取消" ORDER BY time_slot', (visit_date,))
+    c.execute(
+        'SELECT * FROM museum_bookings WHERE visit_date = ? AND status != "已取消" ORDER BY time_slot',
+        (visit_date,),
+    )
     bookings = c.fetchall()
     conn.close()
     return bookings
+
 
 def get_bookings_by_phone(phone):
     """依電話號碼查詢預約記錄"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('SELECT * FROM museum_bookings WHERE applicant_phone = ? ORDER BY visit_date DESC, time_slot', (phone,))
+    c.execute(
+        "SELECT * FROM museum_bookings WHERE applicant_phone = ? ORDER BY visit_date DESC, time_slot",
+        (phone,),
+    )
     bookings = c.fetchall()
     conn.close()
     return bookings
+
 
 def get_booking_count_by_slot(visit_date, time_slot):
     """取得特定時段的預約人數總計"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('''
+    c.execute(
+        """
         SELECT COALESCE(SUM(visitor_count), 0) as total_count
         FROM museum_bookings
         WHERE visit_date = ? AND time_slot = ? AND status != "已取消"
-    ''', (visit_date, time_slot))
+    """,
+        (visit_date, time_slot),
+    )
     result = c.fetchone()
     conn.close()
-    return result['total_count'] if result else 0
+    return result["total_count"] if result else 0
+
 
 def cancel_museum_booking(booking_id):
     """取消預約"""
     conn = get_connection()
     c = conn.cursor()
-    c.execute('''
+    c.execute(
+        """
         UPDATE museum_bookings
         SET status = "已取消"
         WHERE id = ?
-    ''', (booking_id,))
+    """,
+        (booking_id,),
+    )
     conn.commit()
     success = c.rowcount > 0
     conn.close()
     return success
+
+
 # =================================
 # 除錯工具 (Debug Tools)
 # =================================
@@ -1105,7 +1355,12 @@ def reset_meal_data():
 
         # 刪除所有送餐相關表格資料（保留表結構）
         # 使用白名單驗證 table 名稱，防止 SQL 注入
-        ALLOWED_TABLES = ['delivery_records', 'daily_tasks', 'elderly_profiles', 'delivery_routes']
+        ALLOWED_TABLES = [
+            "delivery_records",
+            "daily_tasks",
+            "elderly_profiles",
+            "delivery_routes",
+        ]
         for table in ALLOWED_TABLES:
             # 直接使用白名單中的值，無需額外驗證
             # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query

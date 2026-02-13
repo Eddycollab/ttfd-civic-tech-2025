@@ -34,6 +34,7 @@ NEXT_PAGE_BUTTON_XPATH = "//a[contains(text(), '下一頁')]"
 # 程式邏輯區 (通常不需要修改)
 # ==========================================
 
+
 def setup_driver():
     """初始化 Chrome 瀏覽器"""
     options = webdriver.ChromeOptions()
@@ -52,13 +53,14 @@ def setup_driver():
     driver = webdriver.Chrome(service=service, options=options)
     return driver, download_dir
 
+
 def main():
     driver, download_dir = setup_driver()
 
     try:
         print("正在開啟瀏覽器...")
         if LOGIN_URL.startswith("http"):
-             driver.get(LOGIN_URL)
+            driver.get(LOGIN_URL)
         else:
             print("警告：未設定正確的登入網址，請手動在瀏覽器輸入網址。")
 
@@ -78,7 +80,9 @@ def main():
             print(f"本頁偵測到 {total_rows} 筆資料")
 
             if total_rows == 0:
-                print("警告：本頁找不到任何「維護」按鈕，請確認頁面是否正確，或按鈕文字是否為「維護」。")
+                print(
+                    "警告：本頁找不到任何「維護」按鈕，請確認頁面是否正確，或按鈕文字是否為「維護」。"
+                )
                 break
 
             # XPath 的索引是從 1 開始
@@ -112,7 +116,9 @@ def main():
                     try:
                         print("    正在尋找下載按鈕...")
                         download_btn = WebDriverWait(driver, 10).until(
-                            EC.element_to_be_clickable((By.XPATH, DOWNLOAD_BUTTON_XPATH))
+                            EC.element_to_be_clickable(
+                                (By.XPATH, DOWNLOAD_BUTTON_XPATH)
+                            )
                         )
 
                         # 紀錄下載前的檔案列表
@@ -123,11 +129,16 @@ def main():
 
                         # === 等待新檔案並重新命名 ===
                         new_file = None
-                        for _ in range(30): # 最多等 30 秒
+                        for _ in range(30):  # 最多等 30 秒
                             current_files = set(os.listdir(download_dir))
                             new_files = current_files - existing_files
                             # 過濾掉暫存檔 (.crdownload, .tmp)
-                            valid_new_files = [f for f in new_files if not f.endswith('.crdownload') and not f.endswith('.tmp')]
+                            valid_new_files = [
+                                f
+                                for f in new_files
+                                if not f.endswith(".crdownload")
+                                and not f.endswith(".tmp")
+                            ]
 
                             if valid_new_files:
                                 new_file = valid_new_files[0]
@@ -173,7 +184,9 @@ def main():
 
                         # 等待列表頁重新載入 (等待第一個維護按鈕出現)
                         WebDriverWait(driver, 10).until(
-                            EC.presence_of_element_located((By.XPATH, "//input[@value='維護']"))
+                            EC.presence_of_element_located(
+                                (By.XPATH, "//input[@value='維護']")
+                            )
                         )
                     except Exception as e:
                         print(f"    ❌ 返回列表失敗: {e}")
@@ -205,13 +218,13 @@ def main():
 
                 # 嘗試不同的 XPath 組合 (使用 . 來匹配所有子文字)
                 possible_xpaths = [
-                    "//a[contains(., '下一頁')]",           # 連結型式 (包含子元素)
-                    "//a[contains(text(), '下一頁')]",      # 連結型式 (純文字)
-                    "//input[@value='下一頁']",             # 按鈕型式
-                    "//a[contains(., 'Next')]",            # 英文連結
-                    "//input[@value='Next']",              # 英文按鈕
-                    "//a[contains(., '>')]",               # 符號連結
-                    "//a[@id='ctl00_ContentPlaceHolder1_GridView1_ctl01_LinkButtonNext']" # 常見 ASP.NET ID
+                    "//a[contains(., '下一頁')]",  # 連結型式 (包含子元素)
+                    "//a[contains(text(), '下一頁')]",  # 連結型式 (純文字)
+                    "//input[@value='下一頁']",  # 按鈕型式
+                    "//a[contains(., 'Next')]",  # 英文連結
+                    "//input[@value='Next']",  # 英文按鈕
+                    "//a[contains(., '>')]",  # 符號連結
+                    "//a[@id='ctl00_ContentPlaceHolder1_GridView1_ctl01_LinkButtonNext']",  # 常見 ASP.NET ID
                 ]
 
                 for xpath in possible_xpaths:
@@ -226,8 +239,10 @@ def main():
 
                 if next_page_btn:
                     # 檢查是否為 disabled
-                    if "disabled" in next_page_btn.get_attribute("class") or \
-                       next_page_btn.get_attribute("href") is None:
+                    if (
+                        "disabled" in next_page_btn.get_attribute("class")
+                        or next_page_btn.get_attribute("href") is None
+                    ):
                         print("已到達最後一頁 (按鈕失效)，任務結束。")
                         break
 
@@ -235,7 +250,7 @@ def main():
                     # 使用 JavaScript 點擊，避免被其他元素遮擋
                     driver.execute_script("arguments[0].click();", next_page_btn)
                     page_count += 1
-                    time.sleep(5) # 等待頁面載入
+                    time.sleep(5)  # 等待頁面載入
                 else:
                     print("⚠️ 自動尋找下一頁失敗。")
                     print("請您手動點擊瀏覽器中的「下一頁」按鈕，")
@@ -253,6 +268,7 @@ def main():
         print(f"發生未預期的錯誤: {e}")
     finally:
         print("程式結束。因為設定了 detach，瀏覽器應該會保持開啟。")
+
 
 if __name__ == "__main__":
     main()

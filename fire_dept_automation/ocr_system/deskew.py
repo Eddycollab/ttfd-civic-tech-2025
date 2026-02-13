@@ -10,7 +10,9 @@ from typing import Tuple, Optional
 import math
 
 
-def detect_skew_angle(image: np.ndarray, min_angle: float = -45, max_angle: float = 45) -> float:
+def detect_skew_angle(
+    image: np.ndarray, min_angle: float = -45, max_angle: float = 45
+) -> float:
     """
     偵測圖片的傾斜角度
 
@@ -36,12 +38,7 @@ def detect_skew_angle(image: np.ndarray, min_angle: float = -45, max_angle: floa
 
     # 使用 Hough Transform 偵測直線
     lines = cv2.HoughLinesP(
-        edges,
-        rho=1,
-        theta=np.pi / 180,
-        threshold=100,
-        minLineLength=100,
-        maxLineGap=10
+        edges, rho=1, theta=np.pi / 180, threshold=100, minLineLength=100, maxLineGap=10
     )
 
     if lines is None or len(lines) == 0:
@@ -68,8 +65,11 @@ def detect_skew_angle(image: np.ndarray, min_angle: float = -45, max_angle: floa
     return median_angle
 
 
-def deskew_image(image: np.ndarray, angle: Optional[float] = None,
-                 background_color: Tuple[int, int, int] = (255, 255, 255)) -> Tuple[np.ndarray, float]:
+def deskew_image(
+    image: np.ndarray,
+    angle: Optional[float] = None,
+    background_color: Tuple[int, int, int] = (255, 255, 255),
+) -> Tuple[np.ndarray, float]:
     """
     校正圖片傾斜
 
@@ -111,7 +111,7 @@ def deskew_image(image: np.ndarray, angle: Optional[float] = None,
         rotation_matrix,
         (new_w, new_h),
         borderMode=cv2.BORDER_CONSTANT,
-        borderValue=background_color
+        borderValue=background_color,
     )
 
     return rotated, angle
@@ -144,17 +144,15 @@ def enhance_scan_quality(image: np.ndarray) -> np.ndarray:
     enhanced = clahe.apply(denoised)
 
     # 銳化
-    kernel = np.array([[-1, -1, -1],
-                      [-1,  9, -1],
-                      [-1, -1, -1]])
+    kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
     sharpened = cv2.filter2D(enhanced, -1, kernel)
 
     return sharpened
 
 
-def preprocess_for_ocr(image: np.ndarray,
-                       do_deskew: bool = True,
-                       do_enhance: bool = True) -> Tuple[np.ndarray, dict]:
+def preprocess_for_ocr(
+    image: np.ndarray, do_deskew: bool = True, do_enhance: bool = True
+) -> Tuple[np.ndarray, dict]:
     """
     OCR 前的完整預處理流程
 
@@ -170,7 +168,7 @@ def preprocess_for_ocr(image: np.ndarray,
         "original_size": image.shape[:2],
         "skew_angle": 0.0,
         "deskewed": False,
-        "enhanced": False
+        "enhanced": False,
     }
 
     result = image.copy()

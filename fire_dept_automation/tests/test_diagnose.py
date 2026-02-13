@@ -8,6 +8,7 @@ print("=" * 50)
 
 try:
     import streamlit as st
+
     print(f"✅ Streamlit 已安裝，版本: {st.__version__}")
 except ImportError as e:
     print(f"❌ Streamlit 未安裝: {e}")
@@ -19,6 +20,7 @@ print("=" * 50)
 
 try:
     from streamlit.testing.v1 import AppTest
+
     print("✅ AppTest 已成功導入")
 except ImportError as e:
     print(f"❌ AppTest 導入失敗: {e}")
@@ -35,7 +37,9 @@ try:
     import os
 
     # 創建臨時測試文件
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".py", delete=False, encoding="utf-8"
+    ) as f:
         f.write("""
 import streamlit as st
 st.title("測試頁面")
@@ -65,6 +69,7 @@ st.write("Hello World")
 except Exception as e:
     print(f"❌ 測試失敗: {e}")
     import traceback
+
     traceback.print_exc()
 
 print("\n" + "=" * 50)
@@ -87,6 +92,7 @@ try:
 except Exception as e:
     print(f"❌ Home.py 測試失敗: {e}")
     import traceback
+
     traceback.print_exc()
 
 print("\n" + "=" * 50)

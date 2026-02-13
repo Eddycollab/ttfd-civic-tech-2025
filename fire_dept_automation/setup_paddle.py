@@ -7,6 +7,7 @@ import sys
 import subprocess
 import os
 
+
 def check_system_requirements():
     """檢查系統需求"""
     print("=" * 60)
@@ -24,6 +25,7 @@ def check_system_requirements():
     # Check available memory (rough estimate)
     try:
         import psutil
+
         mem = psutil.virtual_memory()
         mem_gb = mem.total / (1024**3)
         print(f"✓ 系統記憶體: {mem_gb:.1f} GB")
@@ -37,7 +39,7 @@ def check_system_requirements():
 
     # Check disk space
     try:
-        stat = os.statvfs(os.getcwd()) if hasattr(os, 'statvfs') else None
+        stat = os.statvfs(os.getcwd()) if hasattr(os, "statvfs") else None
         if stat:
             free_gb = (stat.f_bavail * stat.f_frsize) / (1024**3)
             print(f"✓ 可用磁碟空間: {free_gb:.1f} GB")
@@ -45,6 +47,7 @@ def check_system_requirements():
         pass
 
     return True
+
 
 def install_paddleocr():
     """安裝 PaddleOCR 及其依賴"""
@@ -60,15 +63,16 @@ def install_paddleocr():
     for package, description in packages:
         print(f"\n正在安裝 {description}...")
         try:
-            subprocess.check_call([
-                sys.executable, "-m", "pip", "install", package, "--upgrade"
-            ])
+            subprocess.check_call(
+                [sys.executable, "-m", "pip", "install", package, "--upgrade"]
+            )
             print(f"✅ {description} 安裝成功")
         except subprocess.CalledProcessError as e:
             print(f"❌ {description} 安裝失敗: {e}")
             return False
 
     return True
+
 
 def verify_installation():
     """驗證安裝"""
@@ -89,7 +93,7 @@ def verify_installation():
         print("\n正在初始化 PaddleOCR (繁體中文)...")
         from paddleocr import PaddleOCR
 
-        ocr = PaddleOCR(lang='chinese_cht', show_log=False)
+        ocr = PaddleOCR(lang="chinese_cht", show_log=False)
         print("✅ PaddleOCR 初始化成功")
 
         # Download model
@@ -101,6 +105,7 @@ def verify_installation():
     except Exception as e:
         print(f"\n❌ 驗證失敗: {e}")
         return False
+
 
 def test_ocr():
     """測試 OCR 功能"""
@@ -129,13 +134,14 @@ def test_ocr():
         print(f"\n❌ 測試失敗: {e}")
         return False
 
+
 def main():
     """主程式"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='PaddleOCR 安裝輔助程式')
-    parser.add_argument('--test', action='store_true', help='只執行測試，不安裝')
-    parser.add_argument('--check', action='store_true', help='只檢查系統需求')
+    parser = argparse.ArgumentParser(description="PaddleOCR 安裝輔助程式")
+    parser.add_argument("--test", action="store_true", help="只執行測試，不安裝")
+    parser.add_argument("--check", action="store_true", help="只檢查系統需求")
 
     args = parser.parse_args()
 
@@ -180,6 +186,7 @@ def main():
     print("=" * 60)
     print("\n您現在可以在系統中使用 PaddleOCR 了")
     print("請重新啟動 Streamlit 應用程式以套用變更")
+
 
 if __name__ == "__main__":
     main()

@@ -11,6 +11,7 @@ OLLAMA_GENERATE_URL = "http://localhost:11434/api/generate"
 DEFAULT_TEXT_MODEL = "llama3"
 DEFAULT_VISION_MODEL = "llama3.2-vision"
 
+
 def is_ollama_available():
     """檢查 Ollama 服務是否運作中"""
     try:
@@ -18,6 +19,7 @@ def is_ollama_available():
         return response.status_code == 200
     except:
         return False
+
 
 def check_vision_model_available(model_name=DEFAULT_VISION_MODEL):
     """檢查指定的 Vision 模型是否可用"""
@@ -28,16 +30,18 @@ def check_vision_model_available(model_name=DEFAULT_VISION_MODEL):
         # 嘗試列出可用模型
         response = requests.get("http://localhost:11434/api/tags", timeout=5)
         if response.status_code == 200:
-            models = response.json().get('models', [])
-            return any(model_name in m['name'] for m in models)
+            models = response.json().get("models", [])
+            return any(model_name in m["name"] for m in models)
         return False
     except:
         return False
 
+
 def image_to_base64(image_path):
     """將圖片檔案轉換為 base64 編碼"""
-    with open(image_path, 'rb') as img_file:
-        return base64.b64encode(img_file.read()).decode('utf-8')
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
+
 
 def compress_image_for_vision(image_path, max_width=1024, quality=85):
     """
@@ -63,18 +67,19 @@ def compress_image_for_vision(image_path, max_width=1024, quality=85):
                 img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
 
             # 轉換為 RGB (移除透明通道)
-            if img.mode in ('RGBA', 'P'):
-                img = img.convert('RGB')
+            if img.mode in ("RGBA", "P"):
+                img = img.convert("RGB")
 
             # 壓縮為 JPEG
             buffer = io.BytesIO()
-            img.save(buffer, format='JPEG', quality=quality, optimize=True)
+            img.save(buffer, format="JPEG", quality=quality, optimize=True)
             buffer.seek(0)
 
-            return base64.b64encode(buffer.read()).decode('utf-8')
+            return base64.b64encode(buffer.read()).decode("utf-8")
     except Exception as e:
         print(f"圖片壓縮失敗: {e}，使用原始圖片")
         return image_to_base64(image_path)
+
 
 def compress_pil_image_for_vision(pil_image, max_width=1024, quality=85):
     """
@@ -100,22 +105,23 @@ def compress_pil_image_for_vision(pil_image, max_width=1024, quality=85):
             img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
 
         # 轉換為 RGB (移除透明通道)
-        if img.mode in ('RGBA', 'P'):
-            img = img.convert('RGB')
+        if img.mode in ("RGBA", "P"):
+            img = img.convert("RGB")
 
         # 壓縮為 JPEG
         buffer = io.BytesIO()
-        img.save(buffer, format='JPEG', quality=quality, optimize=True)
+        img.save(buffer, format="JPEG", quality=quality, optimize=True)
         buffer.seek(0)
 
-        return base64.b64encode(buffer.read()).decode('utf-8')
+        return base64.b64encode(buffer.read()).decode("utf-8")
     except Exception as e:
         print(f"PIL 圖片壓縮失敗: {e}")
         # Fallback: 直接轉 base64
         buffer = io.BytesIO()
-        pil_image.save(buffer, format='PNG')
+        pil_image.save(buffer, format="PNG")
         buffer.seek(0)
-        return base64.b64encode(buffer.read()).decode('utf-8')
+        return base64.b64encode(buffer.read()).decode("utf-8")
+
 
 def classify_page_with_vision(image_path, model=DEFAULT_VISION_MODEL):
     """
@@ -142,23 +148,17 @@ def classify_page_with_vision(image_path, model=DEFAULT_VISION_MODEL):
         # 呼叫 Ollama Chat API (支援 vision)
         payload = {
             "model": model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt,
-                    "images": [img_base64]
-                }
-            ],
-            "stream": False
+            "messages": [{"role": "user", "content": prompt, "images": [img_base64]}],
+            "stream": False,
         }
 
         response = requests.post(OLLAMA_CHAT_URL, json=payload, timeout=60)
 
         if response.status_code == 200:
             result = response.json()
-            doc_type = result['message']['content'].strip()
+            doc_type = result["message"]["content"].strip()
             # 移除可能的引號
-            doc_type = doc_type.strip('"\'')
+            doc_type = doc_type.strip("\"'")
             return doc_type
         else:
             return "未知頁面"
@@ -166,6 +166,7 @@ def classify_page_with_vision(image_path, model=DEFAULT_VISION_MODEL):
     except Exception as e:
         print(f"Vision AI 辨識失敗: {e}")
         return "未知頁面"
+
 
 def extract_checked_items_with_vision(image_path, model=DEFAULT_VISION_MODEL):
     """
@@ -201,24 +202,18 @@ Example: ["滅火器", "避難器具", "火警自動警報設備"]
 
         payload = {
             "model": model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt,
-                    "images": [img_base64]
-                }
-            ],
-            "stream": False
+            "messages": [{"role": "user", "content": prompt, "images": [img_base64]}],
+            "stream": False,
         }
 
         response = requests.post(OLLAMA_CHAT_URL, json=payload, timeout=60)
 
         if response.status_code == 200:
             result = response.json()
-            content = result['message']['content'].strip()
+            content = result["message"]["content"].strip()
 
             # 使用 Regex 提取 JSON 陣列（防止模型輸出多餘文字）
-            json_match = re.search(r'\[.*\]', content, re.DOTALL)
+            json_match = re.search(r"\[.*\]", content, re.DOTALL)
             if json_match:
                 json_str = json_match.group(0)
                 checked_items = json.loads(json_str)
@@ -233,6 +228,7 @@ Example: ["滅火器", "避難器具", "火警自動警報設備"]
     except Exception as e:
         print(f"勾選項目提取失敗: {e}")
         return []
+
 
 def analyze_document_structure(pdf_images_or_path, model=DEFAULT_VISION_MODEL):
     """
@@ -256,7 +252,9 @@ def analyze_document_structure(pdf_images_or_path, model=DEFAULT_VISION_MODEL):
     """
     # 環境檢查
     if not is_ollama_available():
-        raise RuntimeError("Ollama 服務未啟動，請先執行 'ollama serve' 或啟動 Ollama Desktop")
+        raise RuntimeError(
+            "Ollama 服務未啟動，請先執行 'ollama serve' 或啟動 Ollama Desktop"
+        )
 
     if not check_vision_model_available(model):
         raise RuntimeError(f"Vision 模型 '{model}' 未安裝，請執行: ollama pull {model}")
@@ -272,11 +270,11 @@ def analyze_document_structure(pdf_images_or_path, model=DEFAULT_VISION_MODEL):
 
     # 結果容器
     result = {
-        'page_map': {},
-        'toc_page': None,
-        'required_items': [],
-        'validation_report': None,
-        'error': None
+        "page_map": {},
+        "toc_page": None,
+        "required_items": [],
+        "validation_report": None,
+        "error": None,
     }
 
     try:
@@ -286,9 +284,10 @@ def analyze_document_structure(pdf_images_or_path, model=DEFAULT_VISION_MODEL):
             page_num = i + 1
 
             # 如果是 PIL Image，需要先儲存為臨時檔案
-            if hasattr(img, 'save'):
+            if hasattr(img, "save"):
                 import os
                 import tempfile
+
                 temp_dir = tempfile.gettempdir()
                 temp_path = os.path.join(temp_dir, f"temp_page_{page_num}.png")
                 img.save(temp_path)
@@ -301,24 +300,25 @@ def analyze_document_structure(pdf_images_or_path, model=DEFAULT_VISION_MODEL):
                 # 假設是檔案路徑
                 doc_type = classify_page_with_vision(img, model)
 
-            result['page_map'][page_num] = doc_type
+            result["page_map"][page_num] = doc_type
             print(f"  第 {page_num} 頁: {doc_type}")
 
         # Step 2: 偵測「檢修目錄」與勾選項目
         print("\n📋 Step 2: 正在尋找目錄頁並提取勾選項目...")
 
         # 尋找目錄頁
-        toc_keywords = ['目錄', '檢修項目', '申報項目', '清單']
-        for page_num, doc_type in result['page_map'].items():
+        toc_keywords = ["目錄", "檢修項目", "申報項目", "清單"]
+        for page_num, doc_type in result["page_map"].items():
             if any(keyword in doc_type for keyword in toc_keywords):
-                result['toc_page'] = page_num
+                result["toc_page"] = page_num
                 print(f"  ✅ 找到目錄頁: 第 {page_num} 頁")
 
                 # 提取勾選項目
                 img = images[page_num - 1]
-                if hasattr(img, 'save'):
+                if hasattr(img, "save"):
                     import os
                     import tempfile
+
                     temp_dir = tempfile.gettempdir()
                     temp_path = os.path.join(temp_dir, "temp_toc.png")
                     img.save(temp_path)
@@ -330,44 +330,49 @@ def analyze_document_structure(pdf_images_or_path, model=DEFAULT_VISION_MODEL):
                 else:
                     required_items = extract_checked_items_with_vision(img, model)
 
-                result['required_items'] = required_items
+                result["required_items"] = required_items
                 print(f"  找到 {len(required_items)} 個勾選項目: {required_items}")
                 break
 
-        if not result['toc_page']:
+        if not result["toc_page"]:
             print("  ⚠️ 未找到目錄頁")
 
         # Step 3 & 4: 交叉比對 & 生成報告
         print("\n✅ Step 3 & 4: 正在進行交叉比對並生成報告...")
 
         report_data = []
-        for item in result['required_items']:
+        for item in result["required_items"]:
             # 判定規則: 在 page_map 中尋找包含該項目名稱的頁面
             found_pages = []
-            for page_num, doc_type in result['page_map'].items():
+            for page_num, doc_type in result["page_map"].items():
                 # 模糊匹配 (例如 "滅火器" 應該匹配 "滅火器檢查表")
                 if item in doc_type or doc_type in item:
                     found_pages.append(page_num)
 
             status = "✅ 合規" if found_pages else "❌ 缺件"
-            page_list = ", ".join([f"第{p}頁" for p in found_pages]) if found_pages else "-"
+            page_list = (
+                ", ".join([f"第{p}頁" for p in found_pages]) if found_pages else "-"
+            )
 
-            report_data.append({
-                '應檢附項目': item,
-                '是否勾選': '✓',
-                '實際頁數': page_list,
-                '狀態': status
-            })
+            report_data.append(
+                {
+                    "應檢附項目": item,
+                    "是否勾選": "✓",
+                    "實際頁數": page_list,
+                    "狀態": status,
+                }
+            )
 
-        result['validation_report'] = pd.DataFrame(report_data)
+        result["validation_report"] = pd.DataFrame(report_data)
 
         print("  ✅ 報告生成完成")
         return result
 
     except Exception as e:
-        result['error'] = str(e)
+        result["error"] = str(e)
         print(f"❌ 分析過程發生錯誤: {e}")
         return result
+
 
 def analyze_page_with_ai(text_content, model=DEFAULT_TEXT_MODEL):
     """
@@ -489,17 +494,15 @@ def analyze_page_with_ai(text_content, model=DEFAULT_TEXT_MODEL):
     如果找不到欄位，請填 null。只回傳 JSON，不要有其他文字。
     """
 
-    payload = {
-        "model": model,
-        "prompt": prompt,
-        "stream": False
-    }
+    payload = {"model": model, "prompt": prompt, "stream": False}
 
     try:
-        response = requests.post(OLLAMA_GENERATE_URL, json=payload, timeout=60)  # Extended timeout
+        response = requests.post(
+            OLLAMA_GENERATE_URL, json=payload, timeout=60
+        )  # Extended timeout
         if response.status_code == 200:
             result = response.json()
-            response_text = result.get('response', '')
+            response_text = result.get("response", "")
 
             if not response_text or not response_text.strip():
                 return {"error": "AI returned empty response"}
@@ -511,7 +514,9 @@ def analyze_page_with_ai(text_content, model=DEFAULT_TEXT_MODEL):
             extracted_json = None
 
             # Step 1: Try to extract JSON from markdown code block (```json ... ```)
-            markdown_match = re.search(r'```(?:json)?\s*(\{[\s\S]*?\})\s*```', response_text, re.DOTALL)
+            markdown_match = re.search(
+                r"```(?:json)?\s*(\{[\s\S]*?\})\s*```", response_text, re.DOTALL
+            )
             if markdown_match:
                 try:
                     extracted_json = json.loads(markdown_match.group(1))
@@ -522,7 +527,9 @@ def analyze_page_with_ai(text_content, model=DEFAULT_TEXT_MODEL):
             # Step 2: Try direct JSON object extraction (greedy match for nested objects)
             if not extracted_json:
                 # Use a more sophisticated regex that handles nested braces
-                json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', response_text, re.DOTALL)
+                json_match = re.search(
+                    r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", response_text, re.DOTALL
+                )
                 if json_match:
                     try:
                         extracted_json = json.loads(json_match.group(0))
@@ -532,14 +539,14 @@ def analyze_page_with_ai(text_content, model=DEFAULT_TEXT_MODEL):
 
             # Step 3: Try finding JSON with balanced braces
             if not extracted_json:
-                start_idx = response_text.find('{')
+                start_idx = response_text.find("{")
                 if start_idx != -1:
                     brace_count = 0
                     end_idx = start_idx
                     for i, char in enumerate(response_text[start_idx:], start_idx):
-                        if char == '{':
+                        if char == "{":
                             brace_count += 1
-                        elif char == '}':
+                        elif char == "}":
                             brace_count -= 1
                             if brace_count == 0:
                                 end_idx = i + 1
@@ -557,8 +564,9 @@ def analyze_page_with_ai(text_content, model=DEFAULT_TEXT_MODEL):
             if not extracted_json:
                 try:
                     import ast
+
                     # Find dict-like structure
-                    dict_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+                    dict_match = re.search(r"\{.*\}", response_text, re.DOTALL)
                     if dict_match:
                         extracted_json = ast.literal_eval(dict_match.group(0))
                         print("✅ Extracted using ast.literal_eval")
@@ -578,15 +586,18 @@ def analyze_page_with_ai(text_content, model=DEFAULT_TEXT_MODEL):
                 "place_name": None,
                 "address": None,
                 "management_person": None,
-                "equipment_list": []
+                "equipment_list": [],
             }
 
         else:
             return {"error": f"API Error: {response.status_code}"}
     except requests.Timeout:
-        return {"error": "AI request timed out (60s). The model may be loading or overloaded."}
+        return {
+            "error": "AI request timed out (60s). The model may be loading or overloaded."
+        }
     except Exception as e:
         return {"error": str(e)}
+
 
 def analyze_document(pages_text, model=DEFAULT_TEXT_MODEL):
     """
@@ -604,7 +615,7 @@ def analyze_document(pages_text, model=DEFAULT_TEXT_MODEL):
     # 這裡可以實作更複雜的邏輯，例如只分析第一頁，或是彙整所有頁面
     # 優化：同時分析第一頁(基本資料)和目錄頁(設備清單)
     if pages_text:
-        combined_text = pages_text[0] # 預設包含第一頁
+        combined_text = pages_text[0]  # 預設包含第一頁
 
         # 尋找目錄頁 (關鍵字: 目錄, 附表, 檢查表)
         toc_keywords = ["目錄", "附表", "檢查表"]

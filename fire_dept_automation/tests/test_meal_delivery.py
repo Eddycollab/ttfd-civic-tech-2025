@@ -2,6 +2,7 @@
 社區送餐系統自動化邏輯測試
 測試範圍：資料庫結構、排班認領邏輯、打卡紀錄
 """
+
 import unittest
 import sys
 import os
@@ -10,14 +11,14 @@ import datetime
 import io
 
 # 強制 stdout/stderr 使用 UTF-8 編碼 (僅在未被包裝時)
-if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != 'utf-8':
+if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != "utf-8":
     try:
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     except AttributeError:
         pass  # stdout 已經被包裝或不支援 buffer 屬性
-if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != 'utf-8':
+if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != "utf-8":
     try:
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
     except AttributeError:
         pass  # stderr 已經被包裝或不支援 buffer 屬性
 
@@ -33,14 +34,14 @@ try:
 except ImportError as e:
     raise ImportError(f"❌ 無法導入 db_manager，請檢查路徑設定: {e}")
 
-class TestMealDeliverySystem(unittest.TestCase):
 
+class TestMealDeliverySystem(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """測試開始前的準備工作"""
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("開始執行送餐系統邏輯測試")
-        print("="*50)
+        print("=" * 50)
 
         # 確保資料庫已初始化
         # 確保資料庫已初始化並執行遷移
@@ -62,8 +63,8 @@ class TestMealDeliverySystem(unittest.TestCase):
 
         # 檢查 elderly_profiles 表
         self.cursor.execute("PRAGMA table_info(elderly_profiles)")
-        columns = {row['name'] for row in self.cursor.fetchall()}
-        required_cols = {'id', 'name', 'address', 'diet_type', 'route_id', 'sequence'}
+        columns = {row["name"] for row in self.cursor.fetchall()}
+        required_cols = {"id", "name", "address", "diet_type", "route_id", "sequence"}
 
         missing = required_cols - columns
         self.assertTrue(len(missing) == 0, f"elderly_profiles 缺少欄位: {missing}")
@@ -71,8 +72,16 @@ class TestMealDeliverySystem(unittest.TestCase):
 
         # 檢查 delivery_records 表
         self.cursor.execute("PRAGMA table_info(delivery_records)")
-        columns = {row['name'] for row in self.cursor.fetchall()}
-        required_cols = {'id', 'task_id', 'elderly_id', 'status', 'photo_path', 'volunteer_id', 'abnormal_reason'}
+        columns = {row["name"] for row in self.cursor.fetchall()}
+        required_cols = {
+            "id",
+            "task_id",
+            "elderly_id",
+            "status",
+            "photo_path",
+            "volunteer_id",
+            "abnormal_reason",
+        }
 
         missing = required_cols - columns
         self.assertTrue(len(missing) == 0, f"delivery_records 缺少欄位: {missing}")
@@ -84,8 +93,7 @@ class TestMealDeliverySystem(unittest.TestCase):
 
         # 1. 建立測試路線
         route_id = db_manager.create_delivery_route(
-            route_name="測試路線_A",
-            description="自動化測試用"
+            route_name="測試路線_A", description="自動化測試用"
         )
         self.assertTrue(route_id > 0, "建立路線失敗")
 
@@ -94,7 +102,7 @@ class TestMealDeliverySystem(unittest.TestCase):
         task_id = db_manager.create_daily_task(
             date=today,
             route_id=route_id,
-            assigned_volunteer=None  # 初始無人認領
+            assigned_volunteer=None,  # 初始無人認領
         )
         self.assertTrue(task_id > 0, "建立任務失敗")
 
@@ -103,9 +111,13 @@ class TestMealDeliverySystem(unittest.TestCase):
         db_manager.update_task_volunteer(task_id, test_user)
 
         # 4. 驗證
-        self.cursor.execute("SELECT assigned_volunteer FROM daily_tasks WHERE id = ?", (task_id,))
+        self.cursor.execute(
+            "SELECT assigned_volunteer FROM daily_tasks WHERE id = ?", (task_id,)
+        )
         result = self.cursor.fetchone()
-        self.assertEqual(result['assigned_volunteer'], test_user, "任務認領失敗：志工未更新")
+        self.assertEqual(
+            result["assigned_volunteer"], test_user, "任務認領失敗：志工未更新"
+        )
         print(f"   ✅ 任務 {task_id} 成功指派給 {test_user}")
 
         # 清理測試資料
@@ -120,14 +132,10 @@ class TestMealDeliverySystem(unittest.TestCase):
         # 1. 準備測試資料
         route_id = db_manager.create_delivery_route("測試路線_B")
         elderly_id = db_manager.create_elderly_profile(
-            name="測試長者",
-            address="測試地址",
-            phone="0900000000",
-            route_id=route_id
+            name="測試長者", address="測試地址", phone="0900000000", route_id=route_id
         )
         task_id = db_manager.create_daily_task(
-            date=datetime.date.today().isoformat(),
-            route_id=route_id
+            date=datetime.date.today().isoformat(), route_id=route_id
         )
 
         # 2. 模擬打卡 (寫入紀錄)
@@ -137,7 +145,7 @@ class TestMealDeliverySystem(unittest.TestCase):
             status="異常",
             notes="測試備註",
             photo_path="/tmp/test_photo.jpg",
-            abnormal_reason="長者不在家"
+            abnormal_reason="長者不在家",
         )
         self.assertTrue(record_id > 0, "建立打卡紀錄失敗")
 
@@ -145,9 +153,9 @@ class TestMealDeliverySystem(unittest.TestCase):
         self.cursor.execute("SELECT * FROM delivery_records WHERE id = ?", (record_id,))
         record = self.cursor.fetchone()
         self.assertIsNotNone(record, "找不到打卡紀錄")
-        self.assertEqual(record['status'], "異常", "狀態錯誤")
-        self.assertEqual(record['notes'], "測試備註", "備註錯誤")
-        self.assertEqual(record['abnormal_reason'], "長者不在家", "異常原因錯誤")
+        self.assertEqual(record["status"], "異常", "狀態錯誤")
+        self.assertEqual(record["notes"], "測試備註", "備註錯誤")
+        self.assertEqual(record["abnormal_reason"], "長者不在家", "異常原因錯誤")
         print(f"   ✅ 成功建立打卡紀錄 ID: {record_id} (含異常原因)")
 
         # 驗證 check_delivery_status 函式
@@ -171,7 +179,9 @@ class TestMealDeliverySystem(unittest.TestCase):
 
         # 1. 準備資料
         route_id = db_manager.create_delivery_route("測試路線_C")
-        elderly_id = db_manager.create_elderly_profile("測試長者C", "地址C", "0900", route_id=route_id)
+        elderly_id = db_manager.create_elderly_profile(
+            "測試長者C", "地址C", "0900", route_id=route_id
+        )
         today = datetime.date.today().strftime("%Y-%m-%d")
         task_id = db_manager.create_daily_task(today, route_id, "test_vol")
 
@@ -186,9 +196,9 @@ class TestMealDeliverySystem(unittest.TestCase):
         self.assertTrue(len(reports) > 0, "查無報表資料")
         found = False
         for r in reports:
-            if r['route_name'] == "測試路線_C" and r['elderly_name'] == "測試長者C":
-                self.assertEqual(r['status'], "異常")
-                self.assertEqual(r['abnormal_reason'], "長者不在家")
+            if r["route_name"] == "測試路線_C" and r["elderly_name"] == "測試長者C":
+                self.assertEqual(r["status"], "異常")
+                self.assertEqual(r["abnormal_reason"], "長者不在家")
                 found = True
                 break
 
@@ -196,11 +206,14 @@ class TestMealDeliverySystem(unittest.TestCase):
         print("   ✅ 報表查詢成功，資料正確")
 
         # 清理
-        self.cursor.execute("DELETE FROM delivery_records WHERE task_id = ?", (task_id,))
+        self.cursor.execute(
+            "DELETE FROM delivery_records WHERE task_id = ?", (task_id,)
+        )
         self.cursor.execute("DELETE FROM daily_tasks WHERE id = ?", (task_id,))
         self.cursor.execute("DELETE FROM elderly_profiles WHERE id = ?", (elderly_id,))
         self.cursor.execute("DELETE FROM delivery_routes WHERE id = ?", (route_id,))
         self.conn.commit()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(verbosity=2)

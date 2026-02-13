@@ -2,14 +2,16 @@
 資料庫遷移腳本：將案件狀態 '待處理' 更名為 '待分案'
 執行方式: python migrate_status.py
 """
+
 import sqlite3
 import sys
 import os
 
+
 def migrate_status():
     try:
         # 連接資料庫（使用與 db_manager.py 相同的路徑）
-        db_path = os.path.join(os.path.dirname(__file__), 'cases.db')
+        db_path = os.path.join(os.path.dirname(__file__), "cases.db")
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
 
@@ -40,6 +42,7 @@ def migrate_status():
     except Exception as e:
         print(f"❌ 遷移失敗: {str(e)}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     print("=" * 50)

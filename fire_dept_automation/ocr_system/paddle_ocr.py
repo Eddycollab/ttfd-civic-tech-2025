@@ -41,9 +41,9 @@ def get_ocr_engine(use_gpu: bool = True, lang: str = "chinese_cht"):
     return _ocr_engine
 
 
-def ocr_image(image: Union[str, np.ndarray],
-              use_gpu: bool = True,
-              return_confidence: bool = True) -> List[Dict]:
+def ocr_image(
+    image: Union[str, np.ndarray], use_gpu: bool = True, return_confidence: bool = True
+) -> List[Dict]:
     """
     對單張圖片執行 OCR
 
@@ -75,16 +75,18 @@ def ocr_image(image: Union[str, np.ndarray],
     # 新版 PaddleOCR v3 返回 list[dict] 格式
     if isinstance(result, list) and len(result) > 0 and isinstance(result[0], dict):
         item = result[0]
-        texts = item.get('rec_texts', [])
-        scores = item.get('rec_scores', [])
-        polygons = item.get('det_polygons', [])
+        texts = item.get("rec_texts", [])
+        scores = item.get("rec_scores", [])
+        polygons = item.get("det_polygons", [])
 
         for i, text in enumerate(texts):
             parsed_item = {"text": text, "bbox": []}
 
             if i < len(polygons):
                 poly = polygons[i]
-                parsed_item["bbox"] = poly.tolist() if hasattr(poly, 'tolist') else list(poly)
+                parsed_item["bbox"] = (
+                    poly.tolist() if hasattr(poly, "tolist") else list(poly)
+                )
 
             if return_confidence and i < len(scores):
                 parsed_item["confidence"] = float(scores[i])
@@ -110,10 +112,12 @@ def ocr_image(image: Union[str, np.ndarray],
     return parsed_results
 
 
-def ocr_to_text(image: Union[str, np.ndarray],
-                use_gpu: bool = True,
-                min_confidence: float = 0.5,
-                preserve_layout: bool = True) -> str:
+def ocr_to_text(
+    image: Union[str, np.ndarray],
+    use_gpu: bool = True,
+    min_confidence: float = 0.5,
+    preserve_layout: bool = True,
+) -> str:
     """
     對圖片執行 OCR 並轉換為純文字
 
@@ -172,7 +176,9 @@ def ocr_to_text(image: Union[str, np.ndarray],
         return " ".join([r["text"] for r in filtered])
 
     # 排序：先按 Y (行)，再按 X (列)
-    sorted_results = sorted(valid_results, key=lambda x: (get_y_center(x), get_x_start(x)))
+    sorted_results = sorted(
+        valid_results, key=lambda x: (get_y_center(x), get_x_start(x))
+    )
 
     # 分行 (Y 座標差距超過閾值則換行)
     lines = []
@@ -198,8 +204,7 @@ def ocr_to_text(image: Union[str, np.ndarray],
     return "\n".join(lines)
 
 
-def ocr_to_structured(image: Union[str, np.ndarray],
-                      use_gpu: bool = True) -> Dict:
+def ocr_to_structured(image: Union[str, np.ndarray], use_gpu: bool = True) -> Dict:
     """
     對圖片執行 OCR 並回傳結構化資料
 
@@ -217,7 +222,7 @@ def ocr_to_structured(image: Union[str, np.ndarray],
             "full_text": "",
             "lines": [],
             "raw_results": [],
-            "statistics": {"total_items": 0, "avg_confidence": 0}
+            "statistics": {"total_items": 0, "avg_confidence": 0},
         }
 
     # 直接從結果提取文字
@@ -237,7 +242,7 @@ def ocr_to_structured(image: Union[str, np.ndarray],
             "avg_confidence": round(avg_confidence, 4),
             "min_confidence": round(min(confidences), 4) if confidences else 0,
             "max_confidence": round(max(confidences), 4) if confidences else 0,
-        }
+        },
     }
 
 

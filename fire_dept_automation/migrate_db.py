@@ -3,6 +3,7 @@ import os
 
 DB_NAME = "cases.db"
 
+
 def migrate():
     if not os.path.exists(DB_NAME):
         print(f"Database {DB_NAME} not found. No migration needed.")
@@ -30,6 +31,7 @@ def migrate():
     conn.commit()
     conn.close()
     print("Migration completed successfully.")
+
 
 if __name__ == "__main__":
     migrate()

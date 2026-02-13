@@ -6,14 +6,16 @@
 import sys
 import os
 
+
 # ANSI 顏色碼
 class Colors:
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    BLUE = '\033[94m'
-    END = '\033[0m'
-    BOLD = '\033[1m'
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    BLUE = "\033[94m"
+    END = "\033[0m"
+    BOLD = "\033[1m"
+
 
 def print_status(status, message):
     """打印狀態訊息"""
@@ -27,21 +29,28 @@ def print_status(status, message):
         print(f"{Colors.RED}● 紅燈{Colors.END} {message}")
         return False
 
+
 def test_python_version():
     """測試 Python 版本"""
     version = sys.version_info
     if version >= (3, 8):
-        return print_status("PASS", f"Python 版本: {version.major}.{version.minor}.{version.micro} ✓")
+        return print_status(
+            "PASS", f"Python 版本: {version.major}.{version.minor}.{version.micro} ✓"
+        )
     else:
-        return print_status("FAIL", f"Python 版本過舊: {version.major}.{version.minor}.{version.micro} (需要 3.8+)")
+        return print_status(
+            "FAIL",
+            f"Python 版本過舊: {version.major}.{version.minor}.{version.micro} (需要 3.8+)",
+        )
+
 
 def test_core_modules():
     """測試核心模組"""
     modules = {
-        'streamlit': '網頁框架',
-        'pandas': '資料處理',
-        'PIL': '圖片處理',
-        'fitz': 'PDF 處理',
+        "streamlit": "網頁框架",
+        "pandas": "資料處理",
+        "PIL": "圖片處理",
+        "fitz": "PDF 處理",
     }
 
     all_pass = True
@@ -55,6 +64,7 @@ def test_core_modules():
 
     return all_pass
 
+
 def test_ocr_engines():
     """測試 OCR 引擎"""
     print(f"\n{Colors.BOLD}OCR 引擎檢查:{Colors.END}")
@@ -64,6 +74,7 @@ def test_ocr_engines():
     # Test Tesseract
     try:
         import pytesseract
+
         print_status("PASS", "Tesseract OCR (傳統引擎) ✓")
     except ImportError:
         print_status("FAIL", "Tesseract OCR 缺少")
@@ -72,9 +83,10 @@ def test_ocr_engines():
     # Test PaddleOCR
     try:
         import paddle_ocr
+
         if paddle_ocr.is_paddle_available():
             info = paddle_ocr.get_paddle_info()
-            version = info.get('paddleocr_version', 'unknown')
+            version = info.get("paddleocr_version", "unknown")
             print_status("PASS", f"PaddleOCR (高準確率引擎) v{version} ✓")
         else:
             print_status("WARN", "PaddleOCR 未安裝（可選）")
@@ -83,6 +95,7 @@ def test_ocr_engines():
 
     return all_pass
 
+
 def test_ai_engines():
     """測試 AI 引擎"""
     print(f"\n{Colors.BOLD}AI 引擎檢查:{Colors.END}")
@@ -90,6 +103,7 @@ def test_ai_engines():
     # Test Ollama
     try:
         import ai_engine
+
         if ai_engine.is_ollama_available():
             print_status("PASS", "Ollama AI 服務運行中 ✓")
         else:
@@ -99,16 +113,17 @@ def test_ai_engines():
 
     return True  # AI engines are optional
 
+
 def test_file_structure():
     """測試檔案結構"""
     print(f"\n{Colors.BOLD}檔案結構檢查:{Colors.END}")
 
     required_files = {
-        'pages/5_自動比對系統.py': '自動比對系統',
-        'db_manager.py': '資料庫管理',
-        'utils.py': '工具函數',
-        'doc_integrity.py': '文件完整性',
-        'paddle_ocr.py': 'PaddleOCR 模組',
+        "pages/5_自動比對系統.py": "自動比對系統",
+        "db_manager.py": "資料庫管理",
+        "utils.py": "工具函數",
+        "doc_integrity.py": "文件完整性",
+        "paddle_ocr.py": "PaddleOCR 模組",
     }
 
     all_pass = True
@@ -121,12 +136,14 @@ def test_file_structure():
 
     return all_pass
 
+
 def test_database():
     """測試資料庫"""
     print(f"\n{Colors.BOLD}資料庫檢查:{Colors.END}")
 
     try:
         import db_manager
+
         # Try to get cases
         cases = db_manager.get_all_cases()
         print_status("PASS", f"資料庫連線正常，共 {len(cases)} 筆案件 ✓")
@@ -134,6 +151,7 @@ def test_database():
     except Exception as e:
         print_status("WARN", f"資料庫檢查失敗: {e}")
         return True  # Not critical
+
 
 def test_configuration():
     """測試設定檔"""
@@ -149,7 +167,7 @@ def test_configuration():
         print_status("WARN", "Streamlit secrets 設定檔不存在（可選）")
 
     # Check config files
-    config_files = ['config_loader.py', 'requirements.txt']
+    config_files = ["config_loader.py", "requirements.txt"]
     for config in config_files:
         if os.path.exists(config):
             print_status("PASS", f"{config} ✓")
@@ -158,6 +176,7 @@ def test_configuration():
             all_pass = False
 
     return all_pass
+
 
 def run_all_tests():
     """執行所有測試"""
@@ -191,7 +210,7 @@ def run_all_tests():
     passed = sum(1 for _, result in results if result)
     total = len(results)
 
-    print(f"\n通過率: {passed}/{total} ({passed/total*100:.0f}%)\n")
+    print(f"\n通過率: {passed}/{total} ({passed / total * 100:.0f}%)\n")
 
     for name, result in results:
         status = "✓ PASS" if result else "✗ FAIL"
@@ -210,6 +229,7 @@ def run_all_tests():
 
     return passed == total
 
+
 if __name__ == "__main__":
     try:
         success = run_all_tests()
@@ -217,5 +237,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n{Colors.RED}測試執行失敗: {e}{Colors.END}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

@@ -14,14 +14,16 @@ from enum import Enum
 
 class LLMBackend(Enum):
     """LLM 後端選項"""
-    OLLAMA = "ollama"       # 本地 Ollama
-    OPENAI = "openai"       # OpenAI API (GPT-4o)
-    QWEN_API = "qwen_api"   # 阿里雲 Qwen API
+
+    OLLAMA = "ollama"  # 本地 Ollama
+    OPENAI = "openai"  # OpenAI API (GPT-4o)
+    QWEN_API = "qwen_api"  # 阿里雲 Qwen API
 
 
 @dataclass
 class LLMConfig:
     """LLM 配置"""
+
     backend: LLMBackend = LLMBackend.OLLAMA
     model_name: str = "qwen2.5:7b"  # Ollama 模型名稱 (已安裝)
     api_key: Optional[str] = None
@@ -117,8 +119,8 @@ def call_ollama(prompt: str, config: LLMConfig) -> str:
             "stream": False,
             "options": {
                 "temperature": config.temperature,
-                "num_predict": config.max_tokens
-            }
+                "num_predict": config.max_tokens,
+            },
         }
 
         response = requests.post(url, json=payload, timeout=120)
@@ -147,16 +149,13 @@ def call_openai_compatible(prompt: str, config: LLMConfig) -> str:
     try:
         import openai
 
-        client = openai.OpenAI(
-            api_key=config.api_key,
-            base_url=config.api_base
-        )
+        client = openai.OpenAI(api_key=config.api_key, base_url=config.api_base)
 
         response = client.chat.completions.create(
             model=config.model_name,
             messages=[{"role": "user", "content": prompt}],
             temperature=config.temperature,
-            max_tokens=config.max_tokens
+            max_tokens=config.max_tokens,
         )
 
         return response.choices[0].message.content
@@ -187,9 +186,7 @@ def call_llm(prompt: str, config: LLMConfig = None) -> str:
         return call_openai_compatible(prompt, config)
 
 
-def correct_ocr_text(ocr_text: str,
-                     context: str = "",
-                     config: LLMConfig = None) -> str:
+def correct_ocr_text(ocr_text: str, context: str = "", config: LLMConfig = None) -> str:
     """
     使用 LLM 校正 OCR 文字
 
@@ -216,9 +213,9 @@ def correct_ocr_text(ocr_text: str,
     return corrected
 
 
-def extract_structured_data(ocr_text: str,
-                           fields: List[str],
-                           config: LLMConfig = None) -> Dict:
+def extract_structured_data(
+    ocr_text: str, fields: List[str], config: LLMConfig = None
+) -> Dict:
     """
     從 OCR 文字中提取結構化資料
 
@@ -239,7 +236,7 @@ def extract_structured_data(ocr_text: str,
     # 解析 JSON
     try:
         # 嘗試提取 JSON 部分
-        json_match = re.search(r'\{[\s\S]*\}', response)
+        json_match = re.search(r"\{[\s\S]*\}", response)
         if json_match:
             return json.loads(json_match.group())
         else:
@@ -260,6 +257,7 @@ def check_ollama_available(config: LLMConfig = None) -> bool:
 
     try:
         import requests
+
         response = requests.get(f"{config.api_base}/api/tags", timeout=5)
         return response.status_code == 200
     except:
@@ -278,6 +276,7 @@ def list_ollama_models(config: LLMConfig = None) -> List[str]:
 
     try:
         import requests
+
         response = requests.get(f"{config.api_base}/api/tags", timeout=5)
         if response.status_code == 200:
             data = response.json()
