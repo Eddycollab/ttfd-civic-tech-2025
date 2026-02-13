@@ -209,16 +209,21 @@ def main():
 
                                     with col_deliver:
                                         if st.button("✅ 確認送達並上傳", key=f"btn_ok_{elderly_id}", use_container_width=True, type="primary"):
-                                            # 使用新的 save_proof_photo
-                                            photo_path = utils.save_proof_photo(photo, task_id)
+                                            try:
+                                                # 使用新的 save_proof_photo (含權限驗證)
+                                                photo_path = utils.save_proof_photo(photo, task_id, current_user=username)
 
-                                            db.create_delivery_record(task_id, elderly_id, "已送達", photo_path=photo_path, volunteer_id=username)
+                                                db.create_delivery_record(task_id, elderly_id, "已送達", photo_path=photo_path, volunteer_id=username)
 
-                                            # UI Feedback
-                                            st.toast("✅ 送達成功！感謝您的付出", icon="🎉")
-                                            st.balloons()
-                                            time.sleep(1.5) # Wait for balloons
-                                            st.rerun()
+                                                # UI Feedback
+                                                st.toast("✅ 送達成功！感謝您的付出", icon="🎉")
+                                                st.balloons()
+                                                time.sleep(1.5) # Wait for balloons
+                                                st.rerun()
+                                            except PermissionError as e:
+                                                st.error(f"🚫 {str(e)}")
+                                            except Exception as e:
+                                                st.error(f"❌ 上傳失敗：{str(e)}")
 
                                     with col_issue:
                                         if st.button("⚠️ 異常", key=f"btn_err_{elderly_id}", use_container_width=True):
@@ -234,12 +239,17 @@ def main():
                                     if st.button("確認回報", key=f"confirm_issue_{elderly_id}"):
                                         # 異常情況也必須有照片
                                         if photo is not None:
-                                            photo_path = utils.save_proof_photo(photo, task_id)
-                                            db.create_delivery_record(task_id, elderly_id, "異常", notes=issue_note, volunteer_id=username, abnormal_reason=issue_reason, photo_path=photo_path)
-                                            st.toast("⚠️ 異常回報已提交", icon="🛡️")
-                                            st.session_state[f"show_issue_{elderly_id}"] = False
-                                            time.sleep(1)
-                                            st.rerun()
+                                            try:
+                                                photo_path = utils.save_proof_photo(photo, task_id, current_user=username)
+                                                db.create_delivery_record(task_id, elderly_id, "異常", notes=issue_note, volunteer_id=username, abnormal_reason=issue_reason, photo_path=photo_path)
+                                                st.toast("⚠️ 異常回報已提交", icon="🛡️")
+                                                st.session_state[f"show_issue_{elderly_id}"] = False
+                                                time.sleep(1)
+                                                st.rerun()
+                                            except PermissionError as e:
+                                                st.error(f"🚫 {str(e)}")
+                                            except Exception as e:
+                                                st.error(f"❌ 上傳失敗：{str(e)}")
                                         else:
                                             st.error("請先拍照再回報異常")
 

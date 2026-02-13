@@ -775,18 +775,23 @@ def save_delivery_photo(uploaded_file, task_id):
 
     return file_path
 
-def save_proof_photo(file_buffer, task_id):
+def save_proof_photo(file_buffer, task_id, current_user=None):
     """
     儲存送達證明照片（強制拍照模式）
     - 按月份分類資料夾
     - 壓縮圖片至 800px 寬
+    - 驗證使用者權限（僅限任務負責人）
 
     Args:
         file_buffer: Streamlit camera_input 或 file_uploader 的 buffer
         task_id: 任務 ID
+        current_user: 當前使用者帳號（用於權限驗證）
 
     Returns:
         str: 儲存的檔案相對路徑
+        
+    Raises:
+        PermissionError: 當使用者無權限上傳該任務照片時
     """
     if file_buffer is None:
         return None
@@ -794,6 +799,26 @@ def save_proof_photo(file_buffer, task_id):
     import datetime
     from PIL import Image
     import io
+    import db_manager
+
+    # Security: 驗證使用者權限
+    if current_user is not None:
+        conn = db_manager.get_connection()
+        try:
+            c = conn.cursor()
+            c.execute('SELECT assigned_volunteer FROM daily_tasks WHERE id = ?', (task_id,))
+            task = c.fetchone()
+            
+            if not task:
+                raise ValueError(f"任務 ID {task_id} 不存在")
+            
+            assigned_volunteer = task['assigned_volunteer']
+            
+            # 只有被分配的志工才能上傳照片
+            if assigned_volunteer != current_user:
+                raise PermissionError(f"權限不足：此任務不屬於您（任務負責人：{assigned_volunteer or '未分配'}）")
+        finally:
+            conn.close()
 
     # 按月份建立資料夾
     now = datetime.datetime.now()
