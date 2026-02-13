@@ -73,7 +73,6 @@ backend/.env
 *.tgz
 *.bz2
 *.xz
-fire_dept_automation/uv.lock
 
 # Node.js
 node_modules/
