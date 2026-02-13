@@ -8,6 +8,7 @@
 *.db
 *.sqlite
 backups/
+uploads/
 
 # 3. User Uploads & Generated Content
 uploads/
