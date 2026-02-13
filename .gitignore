@@ -50,6 +50,7 @@ htmlcov/
 
 # Deployment
 *.ngrok
+ngrok.yml
 *.pem
 
 # Other
