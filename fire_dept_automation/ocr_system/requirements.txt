@@ -20,7 +20,7 @@ pandas>=2.0.0
 openpyxl>=3.1.0
 
 # HTTP 請求 (LLM API)
-requests>=2.31.0
+requests>=2.33.0
 
 # 選用：OpenAI 相容 API
 # openai>=1.0.0
