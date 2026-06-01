@@ -151,7 +151,7 @@ function GalleryCarousel({ items }: { items: GalleryItem[] }) {
 const galleryImages = [
   {
     src: "/images/gallery/building-exterior.jpg",
-    title: "臺東災害警覺教育館外觀",
+    title: "防災教育館外觀",
     desc: "現代化的防災教育場館",
   },
   {
@@ -201,7 +201,7 @@ export default function Home() {
         {
           src:
             homeContent.heroImage1 || "/images/gallery/building-exterior.jpg",
-          title: homeContent.heroImage1Title || "臺東災害警覺教育館外觀",
+          title: homeContent.heroImage1Title || "防災教育館外觀",
           desc: homeContent.heroImage1Desc || "現代化的防災教育場館",
         },
         {
@@ -257,11 +257,7 @@ export default function Home() {
               href="/"
               className="flex items-center space-x-2 hover:opacity-90 transition-opacity"
             >
-              <img
-                src="/images/taitung-fire-dept-logo.png"
-                alt="台東縣消防局"
-                className="h-10 w-auto"
-              />
+              <span className="text-2xl font-bold text-green-700">防災教育館</span>
             </Link>
 
             {/* 桌面版導航 */}
@@ -269,12 +265,7 @@ export default function Home() {
               <Link href="/" className="hover:text-green-600 transition-colors">
                 首頁
               </Link>
-              <Link
-                href="/booking"
-                className="hover:text-green-600 transition-colors"
-              >
-                預約參訪
-              </Link>
+
               <Link
                 href="/traffic"
                 className="hover:text-green-600 transition-colors"
@@ -361,13 +352,7 @@ export default function Home() {
             >
               首頁
             </Link>
-            <Link
-              href="/booking"
-              className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-md transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              預約參訪
-            </Link>
+
             <Link
               href="/traffic"
               className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-md transition-colors"
@@ -456,7 +441,7 @@ export default function Home() {
             <h1 className="text-4xl md:text-6xl font-bold leading-tight drop-shadow-lg">
               歡迎來到
               <br />
-              <span className="text-green-400">臺東災害警覺教育館</span>
+              <span className="text-green-400">防災教育館</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-200 leading-relaxed drop-shadow">
               化平凡為精彩，綿放台東藍
@@ -464,14 +449,13 @@ export default function Home() {
               學習防災知識，保護您與家人的安全
             </p>
             <div className="flex flex-wrap gap-4 pt-4">
-              <Link href="/booking">
-                <Button
-                  size="lg"
-                  className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-8 py-6 text-lg"
-                >
-                  立即預約參訪
-                </Button>
-              </Link>
+              <Button
+                size="lg"
+                disabled
+                className="bg-gray-500 text-white shadow-lg px-8 py-6 text-lg cursor-not-allowed"
+              >
+                暫停預約參訪
+              </Button>
               <Link href="/traffic">
                 <Button
                   size="lg"
@@ -493,25 +477,23 @@ export default function Home() {
             服務項目
           </h2>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Link href="/booking">
-              <Card className="hover-lift cursor-pointer h-full transition-all hover:shadow-xl">
-                <CardHeader className="text-center">
-                  <div className="mx-auto mb-4 w-32 h-24 flex items-center justify-center overflow-hidden rounded-lg">
-                    <img
-                      src="/images/icons/tour-guide.jpg"
-                      alt="導覽預約"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <CardTitle>導覽預約</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground text-center">
-                    提供團體與個人導覽預約服務，專業志工帶領參觀，深入淺出介紹防災知識與技能
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
+            <Card className="h-full opacity-60 grayscale cursor-not-allowed">
+              <CardHeader className="text-center">
+                <div className="mx-auto mb-4 w-32 h-24 flex items-center justify-center overflow-hidden rounded-lg">
+                  <img
+                    src="/images/icons/tour-guide.jpg"
+                    alt="導覽預約"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <CardTitle>導覽預約 (暫停開放)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground text-center">
+                  目前預約功能重新調整中，暫不開放預約參訪，敬請見諒。
+                </p>
+              </CardContent>
+            </Card>
 
             <Card className="hover-lift h-full">
               <CardHeader className="text-center">
@@ -539,7 +521,7 @@ export default function Home() {
       <section className="section-padding bg-muted/30">
         <div className="container">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-            {homeContent?.aboutTitle || "關於臺東災害警覺教育館"}
+            {homeContent?.aboutTitle || "關於防災教育館"}
           </h2>
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* 輪播圖片區 */}
@@ -606,7 +588,7 @@ export default function Home() {
               <div className="space-y-4 text-muted-foreground">
                 <p>
                   {homeContent?.aboutParagraph1 ||
-                    "臺東災害警覺教育館致力於推廣防災教育，透過互動式體驗設施，讓民眾在實際操作中學習各項防災知識與技能。"}
+                    "防災教育館致力於推廣防災教育，透過互動式體驗設施，讓民眾在實際操作中學習各項防災知識與技能。"}
                 </p>
                 <p>
                   {homeContent?.aboutParagraph2 ||
@@ -765,11 +747,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             {/* Logo和名稱 */}
             <div className="flex items-center">
-              <img
-                src="/images/taitung-fire-dept-logo.png"
-                alt="台東縣消防局"
-                className="h-12 mr-3"
-              />
+              <span className="text-xl font-bold text-gray-700">防災教育館</span>
             </div>
 
             {/* 聯絡資訊和社群連結 */}

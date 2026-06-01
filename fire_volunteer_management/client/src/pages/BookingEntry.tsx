@@ -38,80 +38,49 @@ export default function BookingEntry() {
             <p className="text-muted-foreground">請選擇您的參訪人數類型</p>
           </div>
 
-          {/* 重要提示 */}
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              <strong>重要提醒：</strong>
-              <ul className="mt-2 space-y-1 text-sm">
-                <li>• 本館不接待散客（5人以下）</li>
-                <li>• 大團體（超過60人）需分批預約</li>
-                <li>• 請至少提前3天完成預約</li>
-                <li>• 最早可預約時間為兩周後</li>
-              </ul>
+          {/* 暫停開放提示 */}
+          <Alert className="bg-amber-50 border-amber-200">
+            <AlertCircle className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800">
+              <strong>預約功能調整中：</strong>
+              <p className="mt-1">因應館內預登內容規劃調整，目前暫停線上預約服務。如需諮詢，請電洽服務專線。造成不便，敬請見諒。</p>
             </AlertDescription>
           </Alert>
 
-          {/* 選擇卡片 */}
+          {/* 選擇卡片 (暫停開放) */}
           <div className="grid md:grid-cols-2 gap-6">
             {/* 一般民眾預約 */}
-            <Card
-              className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-primary/50"
-              onClick={() => handleBookingTypeSelect("individual")}
-            >
+            <Card className="opacity-60 grayscale cursor-not-allowed border-2">
               <CardHeader className="text-center pb-4">
-                <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Users className="h-8 w-8 text-primary" />
+                <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                  <Users className="h-8 w-8 text-gray-400" />
                 </div>
-                <CardTitle className="text-2xl">一般民眾</CardTitle>
-                <CardDescription className="text-lg font-semibold text-primary">
-                  5~19人
+                <CardTitle className="text-2xl text-gray-500">一般民眾</CardTitle>
+                <CardDescription className="text-lg font-semibold text-gray-400">
+                  (暫停開放)
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="text-sm text-muted-foreground space-y-2">
-                  <p>
-                    <strong>適合對象：</strong>
-                  </p>
-                  <ul className="list-disc list-inside space-y-1 ml-2">
-                    <li>家庭參訪</li>
-                    <li>小型團體</li>
-                    <li>社區組織</li>
-                  </ul>
-                </div>
-                <Button className="w-full" size="lg">
-                  選擇此類型
+                <Button className="w-full" size="lg" variant="secondary" disabled>
+                  暫不開放
                 </Button>
               </CardContent>
             </Card>
 
             {/* 團體預約 */}
-            <Card
-              className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-primary/50"
-              onClick={() => handleBookingTypeSelect("group")}
-            >
+            <Card className="opacity-60 grayscale cursor-not-allowed border-2">
               <CardHeader className="text-center pb-4">
-                <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Building2 className="h-8 w-8 text-primary" />
+                <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                  <Building2 className="h-8 w-8 text-gray-400" />
                 </div>
-                <CardTitle className="text-2xl">團體</CardTitle>
-                <CardDescription className="text-lg font-semibold text-primary">
-                  20~60人
+                <CardTitle className="text-2xl text-gray-500">團體</CardTitle>
+                <CardDescription className="text-lg font-semibold text-gray-400">
+                  (暫停開放)
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="text-sm text-muted-foreground space-y-2">
-                  <p>
-                    <strong>適合對象：</strong>
-                  </p>
-                  <ul className="list-disc list-inside space-y-1 ml-2">
-                    <li>學校校外教學</li>
-                    <li>企業參訪</li>
-                    <li>機關團體</li>
-                  </ul>
-                </div>
-                <Button className="w-full" size="lg">
-                  選擇此類型
+                <Button className="w-full" size="lg" variant="secondary" disabled>
+                  暫不開放
                 </Button>
               </CardContent>
             </Card>
