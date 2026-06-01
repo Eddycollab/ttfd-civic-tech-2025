@@ -11,8 +11,6 @@ def render_chinese_sidebar():
     st.sidebar.divider()
     if st.sidebar.button(" 首頁", use_container_width=True):
         st.switch_page("home.py")
-    if st.sidebar.button(" 防災館參館預約", use_container_width=True):
-        st.switch_page("pages/1_disaster_prevention_museum_booking.py")
     if st.sidebar.button(" 社區互助送餐", use_container_width=True):
         st.switch_page("pages/2_community_meal_delivery.py")
     if st.sidebar.button(" 民眾申辦與查詢", use_container_width=True):

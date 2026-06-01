@@ -1,9 +1,4 @@
 [[pages]]
-path = "pages/1_disaster_prevention_museum_booking.py"
-name = "防災館參館預約"
-icon = "📢"
-
-[[pages]]
 path = "pages/2_community_meal_delivery.py"
 name = "社區互助送餐"
 icon = "🍱"

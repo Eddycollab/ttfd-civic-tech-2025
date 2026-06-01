@@ -8,7 +8,7 @@ from streamlit_calendar import calendar
 # ==========================================
 # 頁面設定
 # ==========================================
-st.set_page_config(page_title="臺東縣消防局 防災教育館", page_icon="📢", layout="wide")
+st.set_page_config(page_title="防災教育館", page_icon="📢", layout="wide")
 
 # 載入自訂 CSS
 utils.load_custom_css()
@@ -29,7 +29,7 @@ st.markdown(
                 margin-bottom: 30px;
                 box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
         <h1 style="color: white; font-size: 2.8em; font-weight: bold; text-align: center; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
-            🏛️ 臺東縣消防局 防災教育館
+            🏛️ 防災教育館
         </h1>
         <p style="color: rgba(255,255,255,0.9); font-size: 1.3em; text-align: center; margin-top: 15px;">
             體驗防災知識 · 守護生命安全
@@ -72,7 +72,7 @@ if page == " 關於本館":
     with col_about1:
         st.subheader(" 設立宗旨")
         st.markdown(
-            "臺東縣消防局防災教育館成立於 2020 年, 旨在透過互動式體驗教學, 提升民眾防災意識與應變能力.\n"
+            "防災教育館旨在透過互動式體驗教學, 提升民眾防災意識與應變能力.\n"
             "本館結合最新科技與實作訓練, 為全齡層民眾打造完整的防災教育環境.\n\n"
             "#### 核心理念\n"
             "-  **預防勝於救災**: 建立正確防災觀念\n"
@@ -315,7 +315,7 @@ elif page == " 交通資訊":
         # 嵌入 Google Maps 連結按鈕
         st.link_button(
             " 開啟 Google Maps 導航",
-            "https://www.google.com/maps/search/?api=1&query=臺東縣消防局防災教育館",
+            "https://www.google.com/maps/search/?api=1&query=防災教育館",
         )
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -618,7 +618,7 @@ elif page == " 預約參觀":
                             if sender_email and sender_password:
                                 with st.spinner("📧 正在發送預約確認信..."):
                                     # 組建郵件內容
-                                    subject = f"【臺東縣消防局】防災教育館預約確認通知 - 預約編號 {booking_id}"
+                                    subject = f"【防災教育館】預約確認通知 - 預約編號 {booking_id}"
 
                                     # 格式化日期顯示
                                     date_obj = datetime.datetime.strptime(
@@ -636,7 +636,7 @@ elif page == " 預約參觀":
                                     date_display = f"{date_obj.strftime('%Y年%m月%d日')} (週{weekday})"
 
                                     content_html = f"""
-                                    <p>感謝您預約臺東縣消防局防災教育館參觀！</p>
+                                    <p>感謝您預約防災教育館參觀！</p>
                                     <p>您的預約資訊如下：</p>
                                     <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                                         <tr style="background-color: #f7fafc;">
@@ -856,7 +856,7 @@ elif page == " 防災知識與影音":
                 "**更多影片資源**\n\n"
                 "您可以前往以下官方頻道觀看更多防災宣導影片:\n"
                 "- [內政部消防署 YouTube](https://www.youtube.com/@nfa119)\n"
-                "- [臺東縣消防局粉絲專頁](https://www.facebook.com/)"
+                "- [防災教育館粉絲專頁](https://www.facebook.com/)\n"
             )
 
 # ==========================================
@@ -868,7 +868,7 @@ elif page == " 聯絡我們":
         "如有任何建議或問題, 歡迎透過以下方式聯繫我們:\n\n"
         "- Email: museum@ttfd.gov.tw\n"
         "- 電話: 089-322112\n"
-        "- 臺東縣消防局粉絲專頁"
+        "- 防災教育館粉絲專頁"
     )
 
 # ==========================================
@@ -885,5 +885,5 @@ with col_footer_back:
 
 with col_footer_info:
     st.caption(
-        "© 2024 臺東縣消防局 防災教育館 | 服務電話: 089-322112 | Email: museum@ttfd.gov.tw"
+        "© 2024 防災教育館 | 服務電話: 089-322112 | Email: museum@ttfd.gov.tw"
     )

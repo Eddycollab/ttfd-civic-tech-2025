@@ -305,19 +305,14 @@ with col2:
 with col3:
     st.markdown(
         """
-    <div class="service-card-new">
+    <div class="service-card-new" style="opacity:0.45; pointer-events:none; cursor:not-allowed;">
         <div class="service-icon">🏛️</div>
         <h3>防災館智慧導覽</h3>
         <p>民眾線上預約參訪，平台自動媒合有空的導覽員。從預約、派案到提醒，一條龍服務，確保每場導覽順利進行。</p>
+        <p style="color:#e53e3e; font-weight:bold; margin-top:12px;">⚠️ 此功能暫停開放，敬請期待</p>
     </div>
     """,
         unsafe_allow_html=True,
-    )
-    st.page_link(
-        "pages/1_disaster_prevention_museum_booking.py",
-        label="進入服務 →",
-        icon="🏛️",
-        use_container_width=True,
     )
 
 # ==========================================
