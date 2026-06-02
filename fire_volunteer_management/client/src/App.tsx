@@ -1,88 +1,28 @@
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
-import ErrorBoundary from "./components/ErrorBoundary";
-import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
-import EmailTest from "./pages/EmailTest";
-import GroupBooking from "./pages/GroupBooking";
-import IndividualBooking from "./pages/IndividualBooking";
-import BookingQuery from "./pages/BookingQuery";
-import BookingEntry from "./pages/BookingEntry";
+import { ShieldAlert } from "lucide-react";
 
-import AdminDashboard from "./pages/AdminDashboard";
-import Traffic from "./pages/Traffic";
-import MealDeliveryAdmin from "@/pages/MealDeliveryAdmin";
-import DeliveryTracking from "@/pages/DeliveryTracking";
-import VolunteerDelivery from "@/pages/VolunteerDelivery";
-import BatchImportDelivery from "@/pages/BatchImportDelivery";
-import DeliveryVerification from "@/pages/DeliveryVerification";
-import VolunteerPerformanceDashboard from "@/pages/VolunteerPerformanceDashboard";
-import ConfirmReceipt from "@/pages/ConfirmReceipt";
-import SmsTest from "@/pages/SmsTest";
-import TestLogin from "@/pages/TestLogin";
-import RecipientManagement from "@/pages/admin/RecipientManagement";
-import MealConfirm from "@/pages/MealConfirm";
-import News from "@/pages/News";
-import NewsDetail from "@/pages/NewsDetail";
-import Gallery from "@/pages/Gallery";
-import NewsManagement from "@/pages/admin/NewsManagement";
-import GalleryManagement from "@/pages/admin/GalleryManagement";
-import HomeContentManagement from "@/pages/admin/HomeContentManagement";
-
-function Router() {
+function MaintenancePage() {
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/test-login"} component={TestLogin} />
-      <Route path={"/email-test"} component={EmailTest} />
-      <Route path={"/sms-test"} component={SmsTest} />
-      <Route path="/booking" component={BookingEntry} />
-      <Route path="/booking/group" component={GroupBooking} />
-      <Route path="/booking/individual" component={IndividualBooking} />
-      <Route path="/booking/query" component={BookingQuery} />
-
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/traffic" component={Traffic} />
-      <Route path="/meal-delivery" component={MealDeliveryAdmin} />
-      <Route path="/delivery-tracking" component={DeliveryTracking} />
-      <Route path="/volunteer-delivery" component={VolunteerDelivery} />
-      <Route path="/batch-import-delivery" component={BatchImportDelivery} />
-      <Route
-        path="/delivery-verification/:deliveryId"
-        component={DeliveryVerification}
-      />
-      <Route
-        path="/volunteer-performance"
-        component={VolunteerPerformanceDashboard}
-      />
-      <Route path="/confirm-receipt/:deliveryId" component={ConfirmReceipt} />
-      <Route path="/meal-confirm" component={MealConfirm} />
-      <Route path="/admin/recipients" component={RecipientManagement} />
-      <Route path="/admin/news" component={NewsManagement} />
-      <Route path="/admin/gallery" component={GalleryManagement} />
-      <Route path="/admin/home-content" component={HomeContentManagement} />
-      <Route path="/news" component={News} />
-      <Route path="/news/:id" component={NewsDetail} />
-      <Route path="/gallery" component={Gallery} />
-      <Route path="/404" component={NotFound} />
-      <Route component={NotFound} />
-    </Switch>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center border border-slate-100">
+        <div className="inline-flex items-center justify-center w-20 h-20 bg-amber-100 rounded-full mb-6">
+          <ShieldAlert className="w-10 h-10 text-amber-600" />
+        </div>
+        <h1 className="text-3xl font-bold text-slate-900 mb-4">系統維護中</h1>
+        <p className="text-slate-600 text-lg mb-8 leading-relaxed">
+          防災教育館預約系統目前進行內容調整與規劃，暫停所有線上服務。
+        </p>
+        <div className="pt-6 border-t border-slate-100">
+          <p className="text-sm text-slate-400">
+            造成不便，敬請見諒。
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 
 function App() {
-  return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="light">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
-  );
+  return <MaintenancePage />;
 }
 
 export default App;
